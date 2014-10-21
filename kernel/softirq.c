@@ -672,7 +672,7 @@ static void run_ksoftirqd(unsigned int cpu)
 		cond_resched();
 
 		preempt_disable();
-		rcu_note_context_switch(cpu);
+		rcu_note_context_switch();
 		preempt_enable();
 
 		return;
