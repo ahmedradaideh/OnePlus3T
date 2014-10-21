@@ -622,7 +622,7 @@ static int rcu_preempt_offline_tasks(struct rcu_state *rsp,
  *
  * Caller must disable hard irqs.
  */
-static void rcu_preempt_check_callbacks(int cpu)
+static void rcu_preempt_check_callbacks(void)
 {
 	struct task_struct *t = current;
 
@@ -631,8 +631,8 @@ static void rcu_preempt_check_callbacks(int cpu)
 		return;
 	}
 	if (t->rcu_read_lock_nesting > 0 &&
-	    per_cpu(rcu_preempt_data, cpu).qs_pending &&
-	    !per_cpu(rcu_preempt_data, cpu).passed_quiesce)
+	    __this_cpu_read(rcu_preempt_data.qs_pending) &&
+	    !__this_cpu_read(rcu_preempt_data.passed_quiesce))
 		t->rcu_read_unlock_special.b.need_qs = true;
 }
 
@@ -1018,7 +1018,7 @@ static int rcu_preempt_offline_tasks(struct rcu_state *rsp,
  * Because preemptible RCU does not exist, it never has any callbacks
  * to check.
  */
-static void rcu_preempt_check_callbacks(int cpu)
+static void rcu_preempt_check_callbacks(void)
 {
 }
 
