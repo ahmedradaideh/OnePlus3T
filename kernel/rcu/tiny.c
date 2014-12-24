@@ -293,4 +293,6 @@ EXPORT_SYMBOL_GPL(call_rcu_bh);
 void rcu_init(void)
 {
 	open_softirq(RCU_SOFTIRQ, rcu_process_callbacks);
+	RCU_TRACE(reset_cpu_stall_ticks(&rcu_sched_ctrlblk));
+	RCU_TRACE(reset_cpu_stall_ticks(&rcu_bh_ctrlblk));
 }
