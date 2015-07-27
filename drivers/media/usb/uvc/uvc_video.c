@@ -635,6 +635,9 @@ void uvc_video_clock_update(struct uvc_streaming *stream,
 	if (!clock->samples)
 		return;
 
+	if (!uvc_hw_timestamps_param)
+		return;
+
 	spin_lock_irqsave(&clock->lock, flags);
 
 	if (clock->count < clock->size)
