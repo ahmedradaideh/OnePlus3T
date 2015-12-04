@@ -359,6 +359,7 @@ lr	.req	x30		// link register
  */
 	.macro	get_thread_info, rd
 	mrs	\rd, sp_el0
+	nop
 	.endm
 
 	/*
