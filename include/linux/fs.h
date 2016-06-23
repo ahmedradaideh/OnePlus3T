@@ -2886,6 +2886,12 @@ static inline bool dir_relax(struct inode *inode)
 	return !IS_DEADDIR(inode);
 }
 
+static inline bool is_sidechannel_device(const struct inode *inode)
+{
+	umode_t mode = inode->i_mode;
+	return ((S_ISCHR(mode) || S_ISBLK(mode)) && (mode & (S_IROTH | S_IWOTH)));
+}
+
 extern void inode_nohighmem(struct inode *inode);
 extern bool path_noexec(const struct path *path);
 
