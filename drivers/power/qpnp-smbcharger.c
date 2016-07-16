@@ -400,6 +400,8 @@ struct smbchg_chip {
 	struct votable			*hw_aicl_rerun_enable_indirect_votable;
 	struct votable			*aicl_deglitch_short_votable;
 	struct votable			*hvdcp_enable_votable;
+
+	struct work_struct pm_work;
 };
 
 enum qpnp_schg {
@@ -9669,32 +9671,41 @@ static int typeC_notifier_callback(struct notifier_block *self,
 	return 0;
 }
 
+static void qpnp_suspend_resume(struct work_struct *work)
+{
+	struct smbchg_chip *chip =
+		container_of(work, typeof(*chip), pm_work);
+	int val;
+
+	val = chip->oem_lcd_is_on ? 0 : 1;
+	set_property_on_fg(chip, POWER_SUPPLY_PROP_UPDATE_LCD_IS_OFF, val);
+}
+
 #if defined(CONFIG_FB)
 static int fb_notifier_callback(struct notifier_block *self,
 		unsigned long event, void *data)
 {
-	struct fb_event *evdata = data;
-	int *blank;
 	struct smbchg_chip *chip =
 		container_of(self, struct smbchg_chip, fb_notif);
+	struct fb_event *evdata = data;
+	int *blank = evdata->data;
 
-	if (evdata && evdata->data && chip) {
-		if (event == FB_EVENT_BLANK) {
-			blank = evdata->data;
-			if (*blank == FB_BLANK_UNBLANK) {
-				if (!chip->oem_lcd_is_on)
-					set_property_on_fg(chip, POWER_SUPPLY_PROP_UPDATE_LCD_IS_OFF, 0);
-				chip->oem_lcd_is_on = true ;
-			} else if (*blank == FB_BLANK_POWERDOWN) {
-				if (chip->oem_lcd_is_on != false)
-					set_property_on_fg(chip, POWER_SUPPLY_PROP_UPDATE_LCD_IS_OFF, 1);
-				chip->oem_lcd_is_on = false;
-			}
+	if (event != FB_EVENT_BLANK)
+		return NOTIFY_OK;
+
+	if (*blank == FB_BLANK_UNBLANK) {
+		if (!chip->oem_lcd_is_on) {
+			chip->oem_lcd_is_on = true;
+			queue_work(system_highpri_wq, &chip->pm_work);
 		}
-
+	} else if (*blank == FB_BLANK_POWERDOWN) {
+		if (chip->oem_lcd_is_on) {
+			chip->oem_lcd_is_on = false;
+			queue_work(system_highpri_wq, &chip->pm_work);
+		}
 	}
 
-	return 0;
+	return NOTIFY_OK;
 }
 #endif /*CONFIG_FB*/
 
@@ -10585,6 +10596,9 @@ static int smbchg_probe(struct spmi_device *spmi)
 		pr_err("%s: creat test vbat file failed ret = %d\n",
 				__func__, rc);
 	}
+
+	INIT_WORK(&chip->pm_work, qpnp_suspend_resume);
+
 #if defined(CONFIG_FB)
 	chip->fb_notif.notifier_call = fb_notifier_callback;
 
