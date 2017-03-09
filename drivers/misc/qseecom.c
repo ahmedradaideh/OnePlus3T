@@ -4130,7 +4130,6 @@ static int __qseecom_load_fw(struct qseecom_dev_handle *data, char *appname)
 		pr_err("cache operation failed %d\n", ret);
 		goto exit_disable_clk_vote;
 	}
-
 	/* SCM_CALL to load the image */
 	ret = qseecom_scm_call(SCM_SVC_TZSCHEDULER, 1, cmd_buf, cmd_len,
 			&resp, sizeof(resp));
@@ -4250,7 +4249,6 @@ static int qseecom_load_commonlib_image(struct qseecom_dev_handle *data,
 		pr_err("cache operation failed %d\n", ret);
 		goto exit_disable_clk_vote;
 	}
-
 	/* SCM_CALL to load the image */
 	ret = qseecom_scm_call(SCM_SVC_TZSCHEDULER, 1, cmd_buf, cmd_len,
 							&resp, sizeof(resp));
@@ -4816,10 +4814,11 @@ static int __qseecom_enable_clk(enum qseecom_ce_hw_instance ce)
 	}
 	mutex_lock(&clk_access_lock);
 
-	if (qclk->clk_access_cnt == ULONG_MAX) {
+	if (qclk->clk_access_cnt == ULONG_MAX){
 		pr_err("clk_access_cnt beyond limitation\n");
 		goto err;
 	}
+
 	if (qclk->clk_access_cnt > 0) {
 		qclk->clk_access_cnt++;
 		mutex_unlock(&clk_access_lock);
@@ -6534,7 +6533,6 @@ static int __qseecom_qteec_issue_cmd(struct qseecom_dev_handle *data,
 		pr_err("cache operation failed %d\n", ret);
 		return ret;
 	}
-
 	__qseecom_reentrancy_check_if_this_app_blocked(ptr_app);
 
 	ret = qseecom_scm_call(SCM_SVC_TZSCHEDULER, 1,

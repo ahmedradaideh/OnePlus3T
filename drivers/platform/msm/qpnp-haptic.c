@@ -367,6 +367,8 @@ struct qpnp_hap {
 
 static struct qpnp_hap *ghap;
 
+static struct workqueue_struct *vibqueue;
+/* helper to read a pmic register */
 /* helper to read a pmic register */
 static int qpnp_hap_read_reg(struct qpnp_hap *hap, u8 *data, u16 addr)
 {
@@ -765,6 +767,8 @@ static int qpnp_hap_sc_deb_config(struct qpnp_hap *hap)
 		temp = fls(hap->sc_deb_cycles) - 1;
 		reg |= temp - QPNP_HAP_SC_DEB_SUB;
 	}
+	else
+		reg = 0;
 	rc = qpnp_hap_write_reg(hap, &reg, QPNP_HAP_SC_DEB_REG(hap->base));
 	if (rc)
 		return rc;
@@ -1670,8 +1674,9 @@ static void qpnp_hap_td_enable(struct timed_output_dev *dev, int value)
 			      ktime_set(value / 1000, (value % 1000) * 1000000),
 			      HRTIMER_MODE_REL);
 	}
+	queue_work(vibqueue,&hap->work);
+	msleep(1);
 	mutex_unlock(&hap->lock);
-	schedule_work(&hap->work);
 }
 
 /* play pwm bytes */
@@ -2401,6 +2406,9 @@ static int qpnp_haptic_probe(struct spmi_device *spmi)
 
 	mutex_init(&hap->lock);
 	mutex_init(&hap->wf_lock);
+
+	vibqueue = create_singlethread_workqueue("vibthread");
+
 	INIT_WORK(&hap->work, qpnp_hap_worker);
 	INIT_DELAYED_WORK(&hap->sc_work, qpnp_handle_sc_irq);
 	init_completion(&hap->completion);
