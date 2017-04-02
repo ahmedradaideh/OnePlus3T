@@ -1030,19 +1030,6 @@ static inline void userns_fixup_signal_uid(struct siginfo *info, struct task_str
 }
 #endif
 
-static int print_key_process_murder __read_mostly = 1;
-
-static bool is_zygote_process(struct task_struct *t)
-{
-	const struct cred *tcred = __task_cred(t);
-
-	if(!strcmp(t->comm, "main") && (tcred->uid.val == 0) && (t->parent != 0 && !strcmp(t->parent->comm,"init")))
-		return true;
-	else
-		return false;
-	return false;
-}
-
 static int __send_signal(int sig, struct siginfo *info, struct task_struct *t,
 			int group, int from_ancestor_ns)
 {
@@ -1055,19 +1042,7 @@ static int __send_signal(int sig, struct siginfo *info, struct task_struct *t,
 
 	result = TRACE_SIGNAL_IGNORED;
 
-	if(print_key_process_murder) {
-		if(!strcmp(t->comm, "system_server") ||
-			is_zygote_process(t) ||
-			!strcmp(t->comm, "surfaceflinger") ||
-			!strcmp(t->comm, "servicemanager"))
-		{
-			struct task_struct *tg = current->group_leader;
-			printk("process %d:%s, %d:%s send sig:%d to process %d:%s\n",
-					tg->pid, tg->comm, current->pid, current->comm, sig, t->pid, t->comm);
-		}
-	}
 
-	
 	if (!prepare_signal(sig, t,
 			from_ancestor_ns || (info == SEND_SIG_FORCED)))
 		goto ret;
