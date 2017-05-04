@@ -1636,9 +1636,8 @@ static int mdss_dsi_unblank(struct mdss_panel_data *pdata)
 	}
 
 	if ((pdata->panel_info.type == MIPI_CMD_PANEL) &&
-		mipi->vsync_enable && mipi->hw_vsync_mode) {
+		mipi->vsync_enable && mipi->hw_vsync_mode)
 		mdss_dsi_set_tear_on(ctrl_pdata);
-	}
 
 	ctrl_pdata->ctrl_state |= CTRL_STATE_PANEL_INIT;
 
@@ -1706,9 +1705,8 @@ static int mdss_dsi_blank(struct mdss_panel_data *pdata, int power_state)
 	}
 
 	if ((pdata->panel_info.type == MIPI_CMD_PANEL) &&
-		mipi->vsync_enable && mipi->hw_vsync_mode) {
+		mipi->vsync_enable && mipi->hw_vsync_mode)
 		mdss_dsi_set_tear_off(ctrl_pdata);
-	}
 
 	if (ctrl_pdata->ctrl_state & CTRL_STATE_PANEL_INIT) {
 		if (!pdata->panel_info.dynamic_switch_pending) {
@@ -3300,7 +3298,7 @@ static int mdss_dsi_ctrl_probe(struct platform_device *pdev)
 		init_completion(&ctrl_pdata->te_irq_comp);
 		rc = devm_request_irq(&pdev->dev,
 			gpio_to_irq(ctrl_pdata->disp_te_gpio),
-			hw_vsync_handler, IRQF_TRIGGER_FALLING,
+			hw_vsync_handler, IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
 			"VSYNC_GPIO", ctrl_pdata);
 		if (rc) {
 			pr_err("%s: TE request_irq failed for ESD\n", __func__);
