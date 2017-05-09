@@ -731,6 +731,7 @@ struct vfe_device {
 	spinlock_t shared_data_lock;
 	spinlock_t reg_update_lock;
 	spinlock_t tasklet_lock;
+	spinlock_t completion_lock;
 
 	/* Tasklet info */
 	atomic_t irq_cnt;
