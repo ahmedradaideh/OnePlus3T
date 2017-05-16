@@ -313,7 +313,7 @@ static int set_managed_cpus(const char *buf, const struct kernel_param *kp)
 static int get_managed_cpus(char *buf, const struct kernel_param *kp)
 {
 	int i, cnt = 0, total_cnt = 0;
-	char tmp[MAX_LENGTH_CPU_STRING];
+	char tmp[MAX_LENGTH_CPU_STRING] = "";
 
 	if (!clusters_inited)
 		return cnt;
@@ -351,7 +351,7 @@ device_param_cb(managed_cpus, &param_ops_managed_cpus, NULL, 0644);
 static int get_managed_online_cpus(char *buf, const struct kernel_param *kp)
 {
 	int i, cnt = 0, total_cnt = 0;
-	char tmp[MAX_LENGTH_CPU_STRING];
+	char tmp[MAX_LENGTH_CPU_STRING] = "";
 	struct cpumask tmp_mask;
 	struct cluster *i_cl;
 
