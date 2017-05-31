@@ -27,7 +27,6 @@ struct q6audio_effects {
 
 	struct audio_client             *ac;
 	struct msm_hwacc_effects_config  config;
-
 	struct mutex			lock;
 
 	atomic_t			in_count;
@@ -226,7 +225,7 @@ static int audio_effects_shared_ioctl(struct file *file, unsigned cmd,
 		if (!rc) {
 			pr_err("%s: write wait_event_timeout\n", __func__);
 			rc = -EFAULT;
-			 mutex_unlock(&effects->lock);
+			mutex_unlock(&effects->lock);
 			goto ioctl_fail;
 		}
 		if (!atomic_read(&effects->out_count)) {
