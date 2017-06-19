@@ -3194,7 +3194,7 @@ static int mdss_mdp_cmd_early_wake_up(struct mdss_mdp_ctl *ctl)
 	 * Only schedule if the interface has not been stopped.
 	 */
 	if (ctx && !ctx->intf_stopped)
-		schedule_work(&ctx->early_wakeup_clk_work);
+		queue_work(system_highpri_wq, &ctx->early_wakeup_clk_work);
 	return 0;
 }
 
