@@ -312,7 +312,7 @@ struct f2fs_dir_entry *find_in_inline_dir(struct inode *dir,
 	inline_dentry = inline_data_addr(dir, ipage);
 
 	make_dentry_ptr_inline(dir, &d, inline_dentry);
-	de = find_target_dentry(fname, namehash, NULL, &d);
+	de = find_target_dentry(fname, namehash, NULL, &d, NULL);
 	unlock_page(ipage);
 	if (de)
 		*res_page = ipage;
