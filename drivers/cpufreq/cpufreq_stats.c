@@ -625,11 +625,8 @@ static int cpufreq_stat_notifier_policy(struct notifier_block *nb,
 	}
 
 	table = cpufreq_frequency_get_table(cpu);
-	if (!table) {
-		if (val == CPUFREQ_REMOVE_POLICY)
-			__cpufreq_stats_free_table(policy);
+	if (!table)
 		return 0;
-	}
 
 	cpufreq_for_each_valid_entry(pos, table)
 		count++;
