@@ -1715,7 +1715,7 @@ static int cpr3_hmss_regulator_probe(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 	const struct of_device_id *match;
 	struct cpr3_controller *ctrl;
-	struct cpr3_regulator *vreg;
+	struct cpr3_regulator *vreg = NULL;
 	int i, j, rc;
 
 	if (!dev->of_node) {

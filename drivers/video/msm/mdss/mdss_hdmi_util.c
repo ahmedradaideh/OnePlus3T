@@ -1576,7 +1576,7 @@ int hdmi_hdcp2p2_ddc_read_rxstatus(struct hdmi_tx_ddc_ctrl *ctrl)
 	u32 timer;
 	int rc = 0;
 	struct hdmi_tx_hdcp2p2_ddc_data *data;
-	int busy_wait_us;
+	int busy_wait_us = 0;
 
 	if (!ctrl) {
 		pr_err("Invalid ctrl data\n");
