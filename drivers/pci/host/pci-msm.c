@@ -2445,12 +2445,14 @@ int msm_pcie_debug_info(struct pci_dev *dev, u32 option, u32 base,
 			u32 offset, u32 mask, u32 value)
 {
 	int ret = 0;
-	struct msm_pcie_dev_t *pdev;
+	struct msm_pcie_dev_t *pdev = NULL;
 
 	if (!dev) {
 		pr_err("PCIe: the input pci dev is NULL.\n");
 		return -ENODEV;
 	}
+
+	pdev = PCIE_BUS_PRIV_DATA(dev->bus);
 
 	if (option == 12 || option == 13) {
 		if (!base || base > 5) {
@@ -2478,7 +2480,6 @@ int msm_pcie_debug_info(struct pci_dev *dev, u32 option, u32 base,
 		}
 	}
 
-	pdev = PCIE_BUS_PRIV_DATA(dev->bus);
 	rc_sel = 1 << pdev->rc_idx;
 
 	msm_pcie_sel_debug_testcase(pdev, option);
@@ -5449,7 +5450,7 @@ static irqreturn_t handle_global_irq(int irq, void *data)
 	int i;
 	struct msm_pcie_dev_t *dev = data;
 	unsigned long irqsave_flags;
-	u32 status;
+	u32 status = 0;
 
 	spin_lock_irqsave(&dev->global_irq_lock, irqsave_flags);
 
