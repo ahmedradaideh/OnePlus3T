@@ -401,6 +401,7 @@ static int mdss_rotator_create_fence(struct mdss_rot_entry *entry)
 	sync_pt = sw_sync_pt_create(rot_timeline->timeline, val);
 	if (sync_pt == NULL) {
 		pr_err("cannot create sync point\n");
+		ret = -ENOMEM;
 		goto sync_pt_create_err;
 	}
 
@@ -695,7 +696,7 @@ static struct mdss_rot_hw_resource *mdss_rotator_hw_alloc(
 	struct mdss_rot_hw_resource *hw;
 	struct mdss_data_type *mdata = mdss_mdp_get_mdata();
 	u32 pipe_ndx, offset = mdss_mdp_get_wb_ctl_support(mdata, true);
-	int ret;
+	int ret = 0;
 
 	hw = devm_kzalloc(&mgr->pdev->dev, sizeof(struct mdss_rot_hw_resource),
 		GFP_KERNEL);
@@ -750,14 +751,16 @@ static struct mdss_rot_hw_resource *mdss_rotator_hw_alloc(
 	hw->ctl->wb_type = MDSS_MDP_WB_CTL_TYPE_BLOCK;
 
 
-	if (hw->ctl->ops.start_fnc)
+	if (hw->ctl->ops.start_fnc) {
 		ret = hw->ctl->ops.start_fnc(hw->ctl);
+		if (ret)
+			goto error;
+	}
 
-	if (ret)
+	if (pipe_id >= mdata->ndma_pipes) {
+		ret = -EINVAL;
 		goto error;
-
-	if (pipe_id >= mdata->ndma_pipes)
-		goto error;
+	}
 
 	pipe_ndx = mdata->dma_pipes[pipe_id].ndx;
 	hw->pipe = mdss_mdp_pipe_assign(mdata, hw->mixer,
@@ -2744,7 +2747,7 @@ static int mdss_rotator_get_dt_vreg_data(struct device *dev,
 			mp->vreg_config[i].load[DSS_REG_MODE_ENABLE],
 			mp->vreg_config[i].load[DSS_REG_MODE_DISABLE]);
 	}
-	return rc;
+	return 0;
 
 error:
 	if (mp->vreg_config) {

@@ -535,7 +535,7 @@ static void touch_disable(struct synaptics_ts_data *ts)
 
 static int tpd_hw_pwron(struct synaptics_ts_data *ts)
 {
-	int rc;
+	int rc = 0;
 
 	/***enable the 2v8 power*****/
 	if (!IS_ERR(ts->vdd_2v8)) {
@@ -3755,7 +3755,7 @@ static void synaptics_hard_reset(struct synaptics_ts_data *ts)
 }
 static int synaptics_parse_dts(struct device *dev, struct synaptics_ts_data *ts)
 {
-	int rc;
+	int rc = 0;
 	struct device_node *np;
 	int temp_array[2];
 

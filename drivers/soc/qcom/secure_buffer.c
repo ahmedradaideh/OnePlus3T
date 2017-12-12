@@ -248,7 +248,7 @@ int hyp_assign_table(struct sg_table *table,
 			int *dest_vmids, int *dest_perms,
 			int dest_nelems)
 {
-	int ret;
+	int ret = 0;
 	struct info_list *info_list = NULL;
 	struct dest_info_list *dest_info_list = NULL;
 	struct scm_desc desc = {0};

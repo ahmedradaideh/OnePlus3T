@@ -602,7 +602,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
 {
 	struct mmc_blk_ioc_data *idata;
 	struct mmc_blk_data *md;
-	struct mmc_card *card;
+	struct mmc_card *card = NULL;
 	struct mmc_command cmd = {0};
 	struct mmc_data data = {0};
 	struct mmc_request mrq = {NULL};

@@ -1414,7 +1414,7 @@ static void __ufs_qcom_pm_qos_req_end(struct ufs_qcom_host *host, int req_cpu)
 static void ufs_qcom_pm_qos_req_end(struct ufs_hba *hba, struct request *req,
 	bool should_lock)
 {
-	unsigned long flags;
+	unsigned long flags = 0;
 
 	if (!hba || !req)
 		return;
@@ -2282,8 +2282,12 @@ int ufs_qcom_testbus_config(struct ufs_qcom_host *host)
 	/*
 	 * No need for a default case, since
 	 * ufs_qcom_testbus_cfg_is_ok() checks that the configuration
-	 * is legal
+	 * is legal; however, add it anyway to satisfy the compiler.
 	 */
+	default:
+		reg = 0;
+		offset = 0;
+		break;
 	}
 	mask <<= offset;
 	spin_unlock_irqrestore(hba->host->host_lock, flags);
