@@ -2152,7 +2152,7 @@ static int sde_rotator_get_dt_vreg_data(struct device *dev,
 			mp->vreg_config[i].enable_load,
 			mp->vreg_config[i].disable_load);
 	}
-	return rc;
+	return 0;
 
 error:
 	if (mp->vreg_config) {

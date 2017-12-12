@@ -2915,7 +2915,7 @@ static int wcd_cpe_send_param_snd_model(struct wcd_cpe_core *core,
 	struct cmi_obm_msg obm_msg;
 	struct cpe_param_data *param_d;
 
-
+	obm_msg.hdr.hdr_info = 0;
 	ret = fill_cmi_header(&obm_msg.hdr, session->id,
 			CMI_CPE_LSM_SERVICE_ID, 0, 20,
 			CPE_LSM_SESSION_CMD_SET_PARAMS_V2, true);
@@ -3562,7 +3562,7 @@ static int wcd_cpe_lsm_lab_control(
 {
 	struct wcd_cpe_core *core = core_handle;
 	int ret = 0, pld_size = CPE_PARAM_SIZE_LSM_LAB_CONTROL;
-	struct cpe_lsm_control_lab cpe_lab_enable;
+	struct cpe_lsm_control_lab cpe_lab_enable = {{0}};
 	struct cpe_lsm_lab_enable *lab_enable = &cpe_lab_enable.lab_enable;
 	struct cpe_param_data *param_d = &lab_enable->param;
 	struct cpe_lsm_ids ids;
