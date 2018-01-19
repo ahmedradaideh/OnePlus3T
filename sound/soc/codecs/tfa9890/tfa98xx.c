@@ -12,7 +12,6 @@
  * GNU General Public License for more details.
  */
 
-#define DEBUG
 #include <linux/cdev.h>
 #include <linux/clk.h>
 #include <linux/delay.h>
@@ -73,7 +72,7 @@ EXPORT_SYMBOL_GPL(tfa_codec_np);
 static ssize_t tfa98xx_state_store(struct device *dev, struct device_attribute *attr,
 		const char *buf, size_t count)
 {
-    pr_err("%s",__func__);
+    pr_debug("%s",__func__);
 
 	return 0;
 }
@@ -410,7 +409,7 @@ static int tfa98xx_digital_mute(struct snd_soc_dai *dai, int mute)
 	struct snd_soc_codec *codec = dai->codec;
 	struct tfa98xx *tfa98xx = snd_soc_codec_get_drvdata(codec);
 
-	pr_err("state: %d\n", mute);
+	pr_debug("state: %d\n", mute);
 
 	mutex_lock(&tfa98xx->dsp_init_lock);
 
@@ -467,7 +466,7 @@ static int tfa98xx_trigger(struct snd_pcm_substream *substream, int cmd,
 	//struct tfa98xx *tfa98xx = snd_soc_codec_get_drvdata(codec);
 	int ret = 0;
 
-	pr_err("trigger:%d(0:stop 1:start)\n", cmd);
+	pr_debug("trigger:%d(0:stop 1:start)\n", cmd);
 
 	switch (cmd) {
 	case SNDRV_PCM_TRIGGER_START:
@@ -703,7 +702,7 @@ void tfa98xx_play_stop(void)
 {
 	struct tfa98xx *tfa98xx = g_tfa98xx;
 
-    pr_err("tfa stop\n");
+    pr_debug("tfa stop\n");
 
     if(g_tfa98xx == NULL)
     {
