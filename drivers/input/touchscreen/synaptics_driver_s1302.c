@@ -71,7 +71,7 @@ enum oem_boot_mode{
 /*------------------------------------------------Global Define--------------------------------------------*/
 #define TP_TEST_ENABLE 1
 #define TPD_NAME "synaptics"
-#define TPD_DEVICE "HWK,synaptics,s1302"
+#define TPD_DEVICE "synaptics,s1302"
 #define LOG_TAG		"touchkey,s1302"
 
 #define SUPPORT_TP_SLEEP_MODE
@@ -101,7 +101,6 @@ static int key_reverse = 0;
 static struct synaptics_ts_data *tc_g = NULL;
 int test_err = 0;
 static int touchkey_wait_time = 45;
-static bool key_disable=false;
 /*-----------------------------------------Global Registers----------------------------------------------*/
 static unsigned short SynaF34DataBase;
 static unsigned short SynaF34QueryBase;
@@ -180,6 +179,8 @@ static int fb_notifier_callback(struct notifier_block *self, unsigned long event
 static int synaptics_soft_reset(struct synaptics_ts_data *ts);
 static void synaptics_hard_reset(struct synaptics_ts_data *ts);
 
+extern bool s3320_touch_active(void);
+
 /*-------------------------------Using Struct----------------------------------*/
 static const struct i2c_device_id synaptics_ts_id[] = {
 	{ TPD_DEVICE, 0 },
@@ -252,9 +253,6 @@ static struct i2c_driver tc_i2c_driver = {
 	},
 };
 
-static unsigned int polling_interval = 30;
-module_param(polling_interval, uint, 0644);
-
 struct synaptics_ts_data {
 	struct i2c_client *client;
 	struct mutex mutex;
@@ -266,15 +264,12 @@ struct synaptics_ts_data {
 	int pre_btn_state;
 	int is_suspended;
 	uint32_t irq_flags;
-	struct delayed_work dwork;
 #ifdef SUPPORT_FOR_COVER_ESD
     bool cover_reject;
     bool key_back;
     bool key_app_select;
     struct hrtimer timer;
 #endif
-	uint32_t using_polling;
-	struct delayed_work get_touchkey_work;
 	struct work_struct  work;
 	struct delayed_work speed_up_work;
 	struct input_dev *input_dev;
@@ -675,6 +670,8 @@ static bool is_report_key = true;
 #ifdef SUPPORT_VIRTUAL_KEY //WayneChang, 2015/12/29, add flag to enable virtual key
 bool virtual_key_enable;
 EXPORT_SYMBOL(virtual_key_enable);
+struct completion key_cm;
+EXPORT_SYMBOL(key_cm);
 #endif
 static void int_key(struct synaptics_ts_data *ts )
 {
@@ -694,21 +691,21 @@ static void int_key(struct synaptics_ts_data *ts )
         TPD_ERR("touch_key[0x%x],touchkey_state[0x%x]\n",button_key,ts->pre_btn_state);
     if (!is_report_key)
         return;
-    if((button_key & 0x01) && !(ts->pre_btn_state & 0x01) && !key_disable)//back
-    {
-        input_report_key(ts->input_dev, REP_KEY_MENU, 1);
-        input_sync(ts->input_dev);
-    }else if(!(button_key & 0x01) && (ts->pre_btn_state & 0x01) && !key_disable){
-        input_report_key(ts->input_dev, REP_KEY_MENU, 0);
-        input_sync(ts->input_dev);
-    }
-
-    if((button_key & 0x02) && !(ts->pre_btn_state & 0x02) && !key_disable)//menu
+    if((button_key & 0x01) && !(ts->pre_btn_state & 0x01))//back
     {
         input_report_key(ts->input_dev, REP_KEY_BACK, 1);
         input_sync(ts->input_dev);
-    }else if(!(button_key & 0x02) && (ts->pre_btn_state & 0x02) && !key_disable){
+    }else if(!(button_key & 0x01) && (ts->pre_btn_state & 0x01)){
         input_report_key(ts->input_dev, REP_KEY_BACK, 0);
+        input_sync(ts->input_dev);
+    }
+
+    if((button_key & 0x02) && !(ts->pre_btn_state & 0x02))//menu
+    {
+        input_report_key(ts->input_dev, REP_KEY_MENU, 1);
+        input_sync(ts->input_dev);
+    }else if(!(button_key & 0x02) && (ts->pre_btn_state & 0x02)){
+        input_report_key(ts->input_dev, REP_KEY_MENU, 0);
         input_sync(ts->input_dev);
     }
 
@@ -847,7 +844,7 @@ static void synaptics_ts_report(struct synaptics_ts_data *ts )
         else
             int_key(ts);
 #else
-        if (!virtual_key_enable) {
+        if (!virtual_key_enable && !s3320_touch_active()) {
             int_key(ts);
         }
 #endif
@@ -863,16 +860,6 @@ static irqreturn_t synaptics_irq_thread_fn(int irq, void *dev_id)
 	mutex_unlock(&ts->mutex);
 	return IRQ_HANDLED;
 }
-
-static void synaptics_work_thread_fn(struct work_struct *work)
-{
-	struct synaptics_ts_data *ts = container_of(work, struct synaptics_ts_data, dwork.work);
-	mutex_lock(&ts->mutex);
-	synaptics_ts_report(ts);
-	mutex_unlock(&ts->mutex);
-	schedule_delayed_work(&ts->dwork, msecs_to_jiffies(polling_interval));
-}
-
 
 static int	synaptics_input_init(struct synaptics_ts_data *ts)
 {
@@ -965,7 +952,6 @@ static ssize_t synaptics_s1302_fw_write(struct file *file, const char __user *pa
 {
 	char val;
 	int ret;
-	struct synaptics_ts_data *ts = tc_g;
 
     if (NULL == tc_g)
         return -EINVAL;
@@ -980,20 +966,14 @@ static ssize_t synaptics_s1302_fw_write(struct file *file, const char __user *pa
 	val -= '0';
 	if(!val)
 		val = force_update;
-	if(ts->using_polling)
-		cancel_delayed_work_sync(&ts->dwork);
-	else
-		disable_irq_nosync(tc_g->irq);
-	msleep(30);
+
+	disable_irq_nosync(tc_g->irq);
 	mutex_lock(&tc_g->mutex);
 	tc_g->loading_fw = true;
 	synatpitcs_fw_update(tc_g->dev, val);
 	tc_g->loading_fw = false;
 	mutex_unlock(&tc_g->mutex);
-	if(ts->using_polling)
-		schedule_delayed_work(&ts->dwork, msecs_to_jiffies(polling_interval));
-	else
-		enable_irq(tc_g->irq);
+	enable_irq(tc_g->irq);
 	force_update = 0;
 	return t;
 }
@@ -1244,11 +1224,7 @@ static void synaptics_rawdata_get(struct synaptics_ts_data *ts,char *buffer)
 
 	/*disable irq when read data from IC*/
 	memset(delta,0,sizeof(delta));
-	if(ts->using_polling)
-		cancel_delayed_work_sync(&ts->dwork);
-	else
-		disable_irq_nosync(ts->irq);
-	delay_qt_ms(30);
+	disable_irq_nosync(ts->irq);
 	ret = synaptics_rmi4_i2c_write_byte(ts->client, 0xff, 0x1);
 	ret = synaptics_rmi4_i2c_read_block(ts->client, 0xE9, 4, &(buf[0x0]));
 	f54_command_base_add = buf[1];
@@ -1283,11 +1259,7 @@ static void synaptics_rawdata_get(struct synaptics_ts_data *ts,char *buffer)
 	//ret = i2c_smbus_write_byte_data(ts->client,f54_command_base_add,0X02);
 	delay_qt_ms(60);
 	synaptics_enable_interrupt(ts, 1);
-	if(ts->using_polling)
-		schedule_delayed_work(&ts->dwork, msecs_to_jiffies(polling_interval));
-	else
-		enable_irq(ts->irq);
-
+	enable_irq(ts->irq);
 }
 static int synaptics_key_strength_show(struct seq_file *seq, void *offset)
 {
@@ -1344,7 +1316,7 @@ static ssize_t tp_baseline_show(struct file *file, char __user *buf, size_t size
 //	uint8_t tmp_new = 0;
 	uint8_t tmp_l = 0,tmp_h = 0;
 	uint16_t count = 0;
-	//struct synaptics_ts_data *ts = tc_g;
+
 	int16_t baseline_data[2][5];
 	char f54_data_base_add,f54_command_base_add,f54_control_base_add;
 
@@ -1359,13 +1331,8 @@ static ssize_t tp_baseline_show(struct file *file, char __user *buf, size_t size
 		TPD_ERR("kmalloc error!\n");
 		return 0;
 	}
-	if(tc_g->using_polling)
-		cancel_delayed_work_sync(&tc_g->dwork);
-	else
-		disable_irq(tc_g->irq);
-	msleep(30);
-
 	memset(delta_baseline, 0, sizeof(delta_baseline));
+	disable_irq(tc_g->irq);
 	ret = synaptics_rmi4_i2c_write_byte(tc_g->client, 0xff, 0x1);
 	ret = synaptics_rmi4_i2c_read_block(tc_g->client, 0xE9, 4, &(buf[0x0]));
 	f54_command_base_add = buf[1];
@@ -1393,11 +1360,10 @@ static ssize_t tp_baseline_show(struct file *file, char __user *buf, size_t size
 	TPDTM_DMESG("ret = %x ,tmp_old =%x ,tmp_new = %x\n", ret,tmp_old, (tmp_old & 0xef));
 	ret = synaptics_rmi4_i2c_write_byte(tc_g->client, F54_ANALOG_CONTROL_BASE+86, (tmp_old & 0xef));
 	ret = synaptics_rmi4_i2c_write_word(tc_g->client, F54_ANALOG_COMMAND_BASE, 0x04);
-	if(!(tc_g->using_polling)){
-		ret = synaptics_rmi4_i2c_write_byte(tc_g->client, F54_ANALOG_CONTROL_BASE+29, 0x01);// Forbid NoiseMitigation
-		ret = synaptics_rmi4_i2c_write_word(tc_g->client, F54_ANALOG_COMMAND_BASE, 0x04); // force update
-		checkCMD();
-	}
+
+	ret = synaptics_rmi4_i2c_write_byte(tc_g->client, F54_ANALOG_CONTROL_BASE+29, 0x01);// Forbid NoiseMitigation
+	ret = synaptics_rmi4_i2c_write_word(tc_g->client, F54_ANALOG_COMMAND_BASE, 0x04); // force update
+	checkCMD();
 	TPDTM_DMESG("Forbid NoiseMitigation oK\n");\
 	ret = synaptics_rmi4_i2c_write_byte(tc_g->client, F54_ANALOG_COMMAND_BASE, 0X02);//force Cal
 	checkCMD();
@@ -1430,21 +1396,15 @@ static ssize_t tp_baseline_show(struct file *file, char __user *buf, size_t size
 
 	ret = synaptics_rmi4_i2c_write_byte(tc_g->client,F54_ANALOG_COMMAND_BASE,0X02);
 	delay_qt_ms(60);
-	ret = synaptics_soft_reset(tc_g);
-	delay_qt_ms(100);
 	synaptics_enable_interrupt(tc_g,1);
 	mutex_unlock(&tc_g->mutex);
-
+	enable_irq(tc_g->irq);
 	TPDTM_DMESG("\nreport delta image end\n");
 	TPD_ERR("num_read_chars = %zd , size = %zd\n", num_read_chars, size);
 	num_read_chars += sprintf( &( kernel_buf[num_read_chars] ), "%s" , "\r\n" );
 	ret = simple_read_from_buffer(buf, size, ppos, kernel_buf, strlen(kernel_buf));
 	kfree(kernel_buf);
-	delay_qt_ms(10);
-	if(tc_g->using_polling)
-		schedule_delayed_work(&tc_g->dwork, msecs_to_jiffies(polling_interval));
-	else
-		enable_irq(tc_g->irq);
+
 	return ret;
 }
 static const struct file_operations tp_baseline_image_proc_fops =
@@ -1494,53 +1454,6 @@ const struct file_operations proc_virtual_key =
 	.release	= single_release,
 };
 
-static int key_disable_read_func(struct seq_file *seq, void *offset)
-{
-    seq_printf(seq, "s1302 key_disable %s\n",key_disable?("disable"):("enable"));
-    return 0 ;
-}
-
-static int key_disable_open_func(struct inode *inode, struct file *file)
-{
-	return single_open(file, key_disable_read_func, inode->i_private);
-}
-
-static ssize_t key_disable_write_func(struct file *file, const char __user *buffer, size_t count, loff_t *ppos)
-{
-	char buf[10]={0};
-
-	if( count > sizeof(buf)){
-		TPD_ERR("%s error\n",__func__);
-		return count;
-	}
-
-	if(copy_from_user(buf, buffer, count))
-	{
-		TPD_ERR("%s copy error\n", __func__);
-		return count;
-	}
-	if (NULL != strstr(buf,"disable"))
-	{
-		key_disable =true;
-	}
-	else if (NULL != strstr(buf,"enable"))
-	{
-		key_disable =false;
-	}
-	TPD_ERR("%s key_disable:%d \n",__func__,key_disable);
-	return count;
-}
-
-const struct file_operations key_disable_proc_fops =
-{
-	.owner		= THIS_MODULE,
-	.open		= key_disable_open_func,
-	.read		= seq_read,
-	.write          = key_disable_write_func,
-	.llseek 	= seq_lseek,
-	.release	= single_release,
-};
-
 static int synaptics_s1302_proc(void)
 {
     struct proc_dir_entry *proc_entry=0;
@@ -1556,7 +1469,6 @@ static int synaptics_s1302_proc(void)
     proc_entry = proc_create_data("virtual_key", 0666, procdir,&proc_virtual_key,NULL);
     proc_entry = proc_create_data("touchkey_baseline_test", 0644, procdir, &tp_baseline_image_proc_fops,NULL);
     proc_entry = proc_create_data("setting_wait_time_test", 0644, procdir, &setting_wait_time_proc_fops,NULL);
-    proc_entry = proc_create_data("key_disable", 0666, procdir, &key_disable_proc_fops,NULL);
     TPD_ERR("create nodes is successe!\n");
 
     return 0;
@@ -1881,7 +1793,7 @@ static void synaptics_suspend_resume(struct work_struct *work)
 
 static int synaptics_parse_dts(struct device *dev, struct synaptics_ts_data *ts)
 {
-	int rc;
+	int rc = 0;
 	int retval;
 	struct device_node *np;
 
@@ -1976,45 +1888,6 @@ err_pinctrl_get:
 	return retval;
 }
 
-static int choice_gpio_function(struct synaptics_ts_data *ts)
-{
-	int ret=0;
-	i2c_smbus_write_byte_data(ts->client, 0xff, 0x0);
-	ret = i2c_smbus_write_byte_data(ts->client, 0x37, 0x81);
-	if(ret < 0){
-		ret = i2c_smbus_write_byte_data(ts->client, 0x37, 0x81);
-	}
-	msleep(5);
-	synaptics_rmi4_i2c_write_byte(ts->client, 0xff, 0x00 );
-	synaptics_rmi4_i2c_read_word(ts->client, 0x13);
-	msleep(5);
-	if (gpio_is_valid(ts->irq_gpio)) {
-		/* configure touchscreen irq gpio */
-		ret = gpio_request(ts->irq_gpio,"s1302_int");
-		if (ret) {
-			TPD_ERR("unable to request gpio [%d]\n",ts->irq_gpio);
-		}
-		ret = gpio_direction_input(ts->irq_gpio);
-		msleep(50);
-		ts->irq = gpio_to_irq(ts->irq_gpio);
-	}
-	TPD_ERR("synaptic:ts->irq is %d\n",ts->irq);
-	if(!gpio_get_value(ts->irq_gpio)){
-                msleep(2);
-		if(!gpio_get_value(ts->irq_gpio))
-			ts->using_polling = 1;
-		else
-			ts->using_polling = 0;
-	}else{
-		ts->using_polling = 0;
-	}
-	ret = i2c_smbus_write_byte_data(ts->client, 0x37, 0x80);
-	if(ret < 0){
-		ret = i2c_smbus_write_byte_data(ts->client, 0x37, 0x80);
-	}
-	return ret;
-}
-
 static int synaptics_ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
 {
 #ifdef CONFIG_SYNAPTIC_RED
@@ -2039,6 +1912,9 @@ static int synaptics_ts_probe(struct i2c_client *client, const struct i2c_device
 	ts->dev = &client->dev;
 	ts->loading_fw = false;
     tc_g = ts;
+#if (defined SUPPORT_VIRTUAL_KEY)
+    init_completion(&key_cm);
+#endif
     ret = synaptics_dsx_pinctrl_init(ts);
     if (!ret && ts->pinctrl) {
         ret = pinctrl_select_state(ts->pinctrl,
@@ -2076,7 +1952,7 @@ static int synaptics_ts_probe(struct i2c_client *client, const struct i2c_device
 	TPD_ERR("CURRENT_FIRMWARE_ID = 0x%x\n", CURRENT_FIRMWARE_ID);
     sprintf(ts->fw_id,"0x%x",CURRENT_FIRMWARE_ID);
 
-	memset(ts->fw_name,0,TP_FW_NAME_MAX_LEN);
+	memset(ts->fw_name, 0, TP_FW_NAME_MAX_LEN);
 	strcpy(ts->fw_name,"tp/fw_synaptics_touchkey.img");
 	TPD_DEBUG("synatpitcs_fw: fw_name = %s \n",ts->fw_name);
 
@@ -2094,9 +1970,6 @@ static int synaptics_ts_probe(struct i2c_client *client, const struct i2c_device
 	if(ret < 0) {
 		TPD_ERR("synaptics_input_init failed!\n");
 	}
-	ret = synaptics_enable_interrupt(ts, 1);
-	if(ret < 0)
-		TPD_ERR("%s enable interrupt error ret=%d\n",__func__,ret);
 
 	INIT_WORK(&ts->pm_work, synaptics_suspend_resume);
 
@@ -2107,29 +1980,31 @@ static int synaptics_ts_probe(struct i2c_client *client, const struct i2c_device
 	if(ret)
 		TPD_ERR("Unable to register fb_notifier: %d\n", ret);
 #endif
-	ret = choice_gpio_function(ts);
-	if(ret < 0){
-		TPD_ERR("choice_gpio_function faile\n");
+	if (gpio_is_valid(ts->irq_gpio)) {
+		/* configure touchscreen irq gpio */
+		ret = gpio_request(ts->irq_gpio,"s1302_int");
+		if (ret) {
+			TPD_ERR("unable to request gpio [%d]\n",ts->irq_gpio);
+		}
+		ret = gpio_direction_input(ts->irq_gpio);
+		msleep(50);
+		ts->irq = gpio_to_irq(ts->irq_gpio);
 	}
+	TPD_ERR("synaptic:ts->irq is %d\n",ts->irq);
+	ret = request_threaded_irq(ts->irq, NULL,
+			synaptics_irq_thread_fn,
+			ts->irq_flags | IRQF_ONESHOT,
+			TPD_DEVICE, ts);
+	if(ret < 0)
+		TPD_ERR("%s request_threaded_irq ret is %d\n",__func__,ret);
 
-	TPD_ERR("touchkey using poll status:%d \n",ts->using_polling);
-	if(ts->using_polling){
-			INIT_DELAYED_WORK(&ts->dwork, synaptics_work_thread_fn);
-			schedule_delayed_work(&ts->dwork, msecs_to_jiffies(polling_interval));
-	}else{
-			ret = request_threaded_irq(ts->irq, NULL,
-							synaptics_irq_thread_fn,
-							ts->irq_flags | IRQF_ONESHOT,
-							"synaptics-s1302", ts);
-			if(ret < 0)
-				TPD_ERR("%s request_threaded_irq ret is %d\n",__func__,ret);
-	}
-
-	ret = synaptics_soft_reset(ts);
-	if (ret < 0){
-		TPD_ERR("%s faile to reset device\n",__func__);
-	}
-
+    ret = synaptics_soft_reset(ts);
+    if (ret < 0){
+        TPD_ERR("%s faile to reset device\n",__func__);
+    }
+	ret = synaptics_enable_interrupt(ts, 1);
+	if(ret < 0)
+		TPD_ERR("%s enable interrupt error ret=%d\n",__func__,ret);
 #ifdef SUPPORT_FOR_COVER_ESD
     process_key_timer_init(ts);
 #endif
@@ -2193,13 +2068,11 @@ static int synaptics_ts_suspend(struct device *dev)
 		return -1;
 	}
 	ts->is_suspended = 1;
-	if(ts->using_polling)
-		cancel_delayed_work_sync(&ts->dwork);
-	else
-		disable_irq_nosync(ts->irq);
+	disable_irq_nosync(ts->irq);
 	ret = synaptics_rmi4_i2c_write_byte(ts->client, 0xff, 0x00);
 	if (ret < 0) {
-		TPD_ERR("%s: line[%d]Failed to change page!!\n",__func__,__LINE__);
+		TPD_ERR("%s: line[%d]Failed to change page!!\n",
+				__func__,__LINE__);
 		return -1;
 	}
 	ret = i2c_smbus_write_byte_data(ts->client, F01_RMI_CTRL_BASE, 0x81);
@@ -2241,10 +2114,7 @@ static int synaptics_ts_resume(struct device *dev)
 		TPD_ERR("%s:to wakeup failed\n", __func__);
 		goto ERR_RESUME;
 	}
-	if(ts->using_polling)
-		schedule_delayed_work(&ts->dwork, msecs_to_jiffies(polling_interval));
-	else
-		enable_irq(ts->irq);
+	enable_irq(ts->irq);
 	TPD_DEBUG("%s:normal end!\n", __func__);
 ERR_RESUME:
 	mutex_unlock(&ts->mutex);
