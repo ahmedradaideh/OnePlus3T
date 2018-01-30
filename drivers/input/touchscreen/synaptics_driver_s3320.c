@@ -2637,7 +2637,7 @@ static int fb_notifier_callback(struct notifier_block *self, unsigned long event
 	return NOTIFY_OK;
 }
 
-static struct delayed_work init_work;
+static struct work_struct init_work;
 
 static void tpd_init_worker(struct work_struct *work)
 {
@@ -2647,8 +2647,8 @@ static void tpd_init_worker(struct work_struct *work)
 
 static int __init tpd_driver_init(void)
 {
-	INIT_DELAYED_WORK(&init_work, tpd_init_worker);
-	schedule_delayed_work(&init_work, msecs_to_jiffies(1000));
+	INIT_WORK(&init_work, tpd_init_worker);
+	schedule_work(&init_work);
 	return 0;
 }
-device_initcall(tpd_driver_init);
+device_initcall_sync(tpd_driver_init);
