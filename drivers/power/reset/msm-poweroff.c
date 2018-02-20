@@ -45,7 +45,6 @@
 #define SCM_EDLOAD_MODE			0X01
 #define SCM_DLOAD_CMD			0x10
 
-
 static int restart_mode;
 static void *restart_reason;
 static bool scm_pmic_arbiter_disable_supported;
@@ -333,8 +332,24 @@ static void msm_restart_prepare(const char *cmd)
 		} else if (!strncmp(cmd, "edl", 3)) {
 			enable_emergency_dload_mode();
 		} else {
+			/*
+			 * add by yangrujin@bsp 2016/4/6,
+			 * unexpect reboot parameter will
+			 * reboot to normal android
+			 */
+			pr_notice("%s : cmd is %s, set to reboot mode\n", __func__, cmd);
+			qpnp_pon_set_restart_reason(PON_RESTART_REASON_REBOOT);
 			__raw_writel(0x77665501, restart_reason);
 		}
+	} else {
+		/*
+		 * add by yangrujin@bsp 2016/4/6,
+		 * reboot without parameter will
+		 * reboot to normal android
+		 */
+		pr_notice("%s : cmd is NULL, set to reboot mode\n", __func__);
+		qpnp_pon_set_restart_reason(PON_RESTART_REASON_REBOOT);
+		__raw_writel(0x77665501, restart_reason);
 	}
 
 	flush_cache_all();
