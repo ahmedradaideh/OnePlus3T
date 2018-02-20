@@ -84,6 +84,8 @@ const DECLARE_TLV_DB_LINEAR(msm_compr_vol_gain, 0,
 
 #define MAX_NUMBER_OF_STREAMS 2
 
+//use 24bits to get rid of 16bits innate noise
+int gis_24bits = 0;
 struct msm_compr_gapless_state {
 	bool set_next_stream_id;
 	int32_t stream_opened[MAX_NUMBER_OF_STREAMS];
@@ -1117,6 +1119,13 @@ static int msm_compr_configure_dsp_for_playback
 	else if (prtd->codec == FORMAT_FLAC && codec_options &&
 		(codec_options->flac_dec.sample_size != 0))
 		bits_per_sample = codec_options->flac_dec.sample_size;
+	//use 24bits to get rid of 16bits innate noise
+	//mark by globale value to open adm 24bits
+	//lifei modified in 20160430
+	if (prtd->codec_param.codec.bit_rate == 24) {
+		bits_per_sample = 24;
+		gis_24bits = 1;
+	}
 
 	if (prtd->compr_passthr != LEGACY_PCM) {
 		ret = q6asm_open_write_compressed(ac, prtd->codec,
@@ -1956,9 +1965,15 @@ static int msm_compr_trigger(struct snd_compr_stream *cstream, int cmd)
 	unsigned long flags;
 	int stream_id;
 	uint32_t stream_index;
+	//use 24bits to get rid of 16bits innate noise
+	//mark by globale value to open adm 24bits
+	//lifei modified in 20160430
 	uint16_t bits_per_sample = 16;
 	union snd_codec_options *codec_options =
 		&(prtd->codec_param.codec.options);
+	if (prtd->codec_param.codec.bit_rate == 24) {
+		bits_per_sample = 24;
+	}
 
 	spin_lock_irqsave(&prtd->lock, flags);
 	if (atomic_read(&prtd->error)) {
@@ -3026,7 +3041,10 @@ static int msm_compr_audio_effects_config_get(struct snd_kcontrol *kcontrol,
 	cstream = pdata->cstream[fe_id];
 	audio_effects = pdata->audio_effects[fe_id];
 	if (!cstream || !audio_effects) {
-		pr_err("%s: stream or effects inactive\n", __func__);
+        /* If ALSA framework trys to list all controls, too many errors are printed */
+        /* in some cases. Without allocating resources this error is expected. */
+        /* Reduce error level to debug. */
+        pr_debug("%s: stream or effects inactive\n", __func__);
 		return -EINVAL;
 	}
 	prtd = cstream->runtime->private_data;
