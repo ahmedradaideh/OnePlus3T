@@ -103,6 +103,7 @@
 	       // qcom,mdss-tear-check-rd-ptr-trigger-intr= <1921>; /* Height + 1 */
 
 		qcom,ulps-enabled;
+		qcom,suspend-ulps-enabled;
 		qcom,panel-allow-phy-poweroff;
 
 		cm,mdss-livedisplay-cabc-cmd = [
