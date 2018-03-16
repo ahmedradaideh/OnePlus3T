@@ -443,11 +443,6 @@ static int config_usb_cfg_link(
 	}
 
 	f = usb_get_function(fi);
-	if (f == NULL) {
-		/* Are we trying to symlink PTP without MTP function? */
-		ret = -EINVAL; /* Invalid Configuration */
-		goto out;
-	}
 	if (IS_ERR(f)) {
 		ret = PTR_ERR(f);
 		goto out;
@@ -1607,6 +1602,7 @@ static const struct usb_gadget_driver configfs_driver_template = {
 	.unbind         = configfs_composite_unbind,
 #ifdef CONFIG_USB_CONFIGFS_UEVENT
 	.setup          = android_setup,
+	.reset          = android_disconnect,
 	.disconnect     = android_disconnect,
 #else
 	.setup          = composite_setup,
@@ -1653,6 +1649,54 @@ static struct device_attribute *android_usb_attributes[] = {
 	&dev_attr_state,
 	NULL
 };
+
+static int android_device_create(struct gadget_info *gi)
+{
+	struct device_attribute **attrs;
+	struct device_attribute *attr;
+
+	INIT_WORK(&gi->work, android_work);
+	android_device = device_create(android_class, NULL,
+				MKDEV(0, 0), NULL, "android0");
+	if (IS_ERR(android_device))
+		return PTR_ERR(android_device);
+
+	dev_set_drvdata(android_device, gi);
+
+	attrs = android_usb_attributes;
+	while ((attr = *attrs++)) {
+		int err;
+
+		err = device_create_file(android_device, attr);
+		if (err) {
+			device_destroy(android_device->class,
+				       android_device->devt);
+			return err;
+		}
+	}
+
+	return 0;
+}
+
+static void android_device_destroy(void)
+{
+	struct device_attribute **attrs;
+	struct device_attribute *attr;
+
+	attrs = android_usb_attributes;
+	while ((attr = *attrs++))
+		device_remove_file(android_device, attr);
+	device_destroy(android_device->class, android_device->devt);
+}
+#else
+static inline int android_device_create(struct gadget_info *gi)
+{
+	return 0;
+}
+
+static inline void android_device_destroy(void)
+{
+}
 #endif
 
 static struct config_group *gadgets_make(
@@ -1660,11 +1704,6 @@ static struct config_group *gadgets_make(
 		const char *name)
 {
 	struct gadget_info *gi;
-#ifdef CONFIG_USB_CONFIGFS_UEVENT
-	struct device_attribute **attrs;
-	struct device_attribute *attr;
-	int err;
-#endif
 
 	gi = kzalloc(sizeof(*gi), GFP_KERNEL);
 	if (!gi)
@@ -1704,25 +1743,11 @@ static struct config_group *gadgets_make(
 	gi->composite.gadget_driver.function = kstrdup(name, GFP_KERNEL);
 	gi->composite.name = gi->composite.gadget_driver.function;
 
-#ifdef CONFIG_USB_CONFIGFS_UEVENT
-	INIT_WORK(&gi->work, android_work);
-	android_device = device_create(android_class, NULL,
-				MKDEV(0, 0), NULL, "android0");
-	if (IS_ERR(android_device))
+	if (!gi->composite.gadget_driver.function)
 		goto err;
 
-	dev_set_drvdata(android_device, gi);
-
-	attrs = android_usb_attributes;
-	while ((attr = *attrs++)) {
-		err = device_create_file(android_device, attr);
-		if (err)
-			goto err1;
-	}
-#endif
-
-	if (!gi->composite.gadget_driver.function)
-		goto err1;
+	if (android_device_create(gi) < 0)
+		goto err;
 
 #ifdef CONFIG_USB_OTG
 	gi->otg.bLength = sizeof(struct usb_otg_descriptor);
@@ -1734,35 +1759,15 @@ static struct config_group *gadgets_make(
 				&gadget_root_type);
 	return &gi->group;
 
-err1:
-#ifdef CONFIG_USB_CONFIGFS_UEVENT
-	attrs = android_usb_attributes;
-	while ((attr = *attrs++))
-		device_remove_file(android_device, attr);
-
-	device_destroy(android_device->class,
-				android_device->devt);
 err:
-#endif
 	kfree(gi);
 	return ERR_PTR(-ENOMEM);
 }
 
 static void gadgets_drop(struct config_group *group, struct config_item *item)
 {
-#ifdef CONFIG_USB_CONFIGFS_UEVENT
-	struct device_attribute **attrs;
-	struct device_attribute *attr;
-#endif
-
 	config_item_put(item);
-
-#ifdef CONFIG_USB_CONFIGFS_UEVENT
-	attrs = android_usb_attributes;
-	while ((attr = *attrs++))
-		device_remove_file(android_device, attr);
-	device_destroy(android_device->class, android_device->devt);
-#endif
+	android_device_destroy();
 }
 
 static struct configfs_group_operations gadgets_ops = {
@@ -1789,7 +1794,9 @@ void unregister_gadget_item(struct config_item *item)
 {
 	struct gadget_info *gi = to_gadget_info(item);
 
+	mutex_lock(&gi->lock);
 	unregister_gadget(gi);
+	mutex_unlock(&gi->lock);
 }
 EXPORT_SYMBOL_GPL(unregister_gadget_item);
 
