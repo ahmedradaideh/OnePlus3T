@@ -555,7 +555,7 @@ static void f_midi_transmit(struct f_midi *midi, struct usb_request *req)
 		req = midi_alloc_ep_req(ep, midi->buflen + extra_buf_alloc);
 
 	if (!req) {
-		ERROR(midi, "gmidi_transmit: midi_alloc_ep_request failed\n");
+		ERROR(midi, "gmidi_transmit: alloc_ep_request failed\n");
 		return;
 	}
 	req->length = 0;
