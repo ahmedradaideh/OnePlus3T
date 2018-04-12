@@ -1065,10 +1065,6 @@
 	};
 };
 
-&i2c_8 {
-	qcom,disable-dma;
-};
-
 &clock_audio {
 	/delete-property/ pinctrl-0;
 	/delete-property/ pinctrl-1;
