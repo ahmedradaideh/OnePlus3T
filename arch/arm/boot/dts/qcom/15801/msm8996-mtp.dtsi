@@ -47,10 +47,7 @@
 };
 
 &uartblsp2dm1 {
-	status = "ok";
-	pinctrl-names = "uart_active", "uart_deactive";
-	pinctrl-0 = <&uart_console_active>;
-	pinctrl-1 = <&uart_console_deactive>;
+	status = "disabled";
 };
 
 &sdhc_1 {
@@ -1152,19 +1149,6 @@
 
 // msm8996-pinctrl.dtsi
 &tlmm {
-	uart_console_deactive: uart_console_deactive {
-		mux {
-			pins = "gpio4", "gpio5";
-			function = "gpio";
-		};
-
-		config {
-			pins = "gpio4", "gpio5";
-			drive-strength = <2>;
-			bias-disable;
-		};
-	};
-
 	mdss_exits_active: mdss_exits_active {
 		mux {
 			pins = "gpio33";
