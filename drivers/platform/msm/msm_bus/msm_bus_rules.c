@@ -882,4 +882,3 @@ bool msm_rule_are_rules_registered(void)
 	mutex_unlock(&msm_bus_rules_lock);
 	return ret;
 }
-
