@@ -24,4 +24,3 @@ obj-$(CONFIG_PINCTRL) += pinctrl.o
 obj-$(CONFIG_DEV_COREDUMP) += devcoredump.o
 
 ccflags-$(CONFIG_DEBUG_DRIVER) := -DDEBUG
-

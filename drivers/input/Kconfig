@@ -219,4 +219,3 @@ source "drivers/input/gameport/Kconfig"
 endmenu
 
 endmenu
-

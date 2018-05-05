@@ -580,7 +580,6 @@ static int qcedev_sha_init(struct qcedev_async_req *areq,
 	return 0;
 }
 
-
 static int qcedev_sha_update_max_xfer(struct qcedev_async_req *qcedev_areq,
 				struct qcedev_handle *handle,
 				struct scatterlist *sg_src)
@@ -630,7 +629,6 @@ static int qcedev_sha_update_max_xfer(struct qcedev_async_req *qcedev_areq,
 
 		return 0;
 	}
-
 
 	k_buf_src = kmalloc(total + CACHE_LINE_SIZE * 2,
 				GFP_KERNEL);
@@ -1130,7 +1128,6 @@ static int qcedev_vbuf_ablk_cipher_max_xfer(struct qcedev_async_req *areq,
 	uint8_t *user_src = NULL;
 	uint8_t *k_align_dst = k_align_src;
 	struct	qcedev_cipher_op_req *creq = &areq->cipher_op_req;
-
 
 	if (areq->cipher_op_req.mode == QCEDEV_AES_MODE_CTR)
 		byteoffset = areq->cipher_op_req.byteoffset;

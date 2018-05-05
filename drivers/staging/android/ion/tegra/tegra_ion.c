@@ -79,4 +79,3 @@ static struct platform_driver ion_driver = {
 };
 
 module_platform_driver(ion_driver);
-

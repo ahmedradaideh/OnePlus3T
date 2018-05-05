@@ -1867,6 +1867,7 @@ config PANIC_ON_DATA_CORRUPTION
 	 Select this option to upgrade warnings for potentially
 	 recoverable data corruption scenarios to system-halting panics,
 	 for easier detection and debug.
+
 config MEMTEST
 	bool "Memtest"
 	depends on HAVE_MEMBLOCK
@@ -1884,4 +1885,3 @@ source "samples/Kconfig"
 source "lib/Kconfig.kgdb"
 
 source "lib/Kconfig.ubsan"
-

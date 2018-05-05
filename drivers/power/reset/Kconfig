@@ -161,4 +161,3 @@ config POWER_RESET_SYSCON
 	  Reboot support for generic SYSCON mapped register reset.
 
 endif
-
