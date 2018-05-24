@@ -63,6 +63,9 @@ struct fpc1020_data {
 	int vdd_en_gpio;
 };
 
+extern bool s3320_touch_active(void);
+extern bool virtual_key_enable;
+
 static void hw_reset(struct fpc1020_data *f)
 {
 	int i;
@@ -217,14 +220,13 @@ static ssize_t proximity_state_set(struct device *dev,
 	return count;
 }
 
-extern bool virtual_key_enable;
 static ssize_t report_home_set(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct fpc1020_data *f = dev_get_drvdata(dev);
 
 	if (!memcmp(buf, "down", sizeof("down"))) {
-		if (!virtual_key_enable) {
+		if (!s3320_touch_active() && !virtual_key_enable) {
 			input_report_key(f->input_dev, KEY_HOME, 1);
 			input_sync(f->input_dev);
 		}

@@ -875,7 +875,7 @@
 
 &i2c_8 { /* BLSP2 QUP2 */
 	synaptics-rmi-ts@20 {
-		compatible = "HWK,synaptics,s1302";
+		compatible = "synaptics,s1302";
 		reg = <0x20>;
 		interrupt-parent = <&tlmm>;
 		interrupts = <132 0x2008>;
