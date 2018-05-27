@@ -1025,7 +1025,7 @@ static int pn544_suspend(struct i2c_client *client, pm_message_t message)
 	struct pn544_dev *pn544_dev = i2c_get_clientdata(client);
     
     printk("%s pn544_dev->clk_gpio = %d\n", __func__, gpio_get_value(pn544_dev->clk_gpio));	
-	if(gpio_get_value(pn544_dev->clk_gpio)){
+	if (pn544_dev->nfc_ven_enabled && gpio_get_value(pn544_dev->clk_gpio)) {
 		wake_lock(&pn544_dev->pn544_wake_lock);		
 		pn544_enable_clk(pn544_dev);
 	}
