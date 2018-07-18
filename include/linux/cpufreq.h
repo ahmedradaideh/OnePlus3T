@@ -513,9 +513,6 @@ extern struct cpufreq_governor cpufreq_gov_conservative;
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_INTERACTIVE)
 extern struct cpufreq_governor cpufreq_gov_interactive;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_interactive)
-#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_SCHED)
-extern struct cpufreq_governor cpufreq_gov_sched;
-#define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_sched)
 #endif
 
 /*********************************************************************
@@ -652,7 +649,4 @@ int cpufreq_generic_init(struct cpufreq_policy *policy,
 
 void acct_update_power(struct task_struct *p, cputime_t cputime);
 
-struct sched_domain;
-unsigned long cpufreq_scale_freq_capacity(struct sched_domain *sd, int cpu);
-unsigned long cpufreq_scale_max_freq_capacity(int cpu);
 #endif /* _LINUX_CPUFREQ_H */
