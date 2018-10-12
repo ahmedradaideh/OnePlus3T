@@ -176,6 +176,7 @@ static struct page_info *alloc_largest_available(struct ion_system_heap *heap,
 
 	return NULL;
 }
+
 static unsigned int process_info(struct page_info *info,
 				 struct scatterlist *sg,
 				 struct scatterlist *sg_sync,
@@ -605,8 +606,6 @@ static int ion_system_heap_debug_show(struct ion_heap *heap, struct seq_file *s,
 		}
 	}
 
-
-
 	if (use_seq) {
 		seq_puts(s, "--------------------------------------------\n");
 		seq_printf(s, "uncached pool = %lu cached pool = %lu secure pool = %lu\n",
@@ -625,7 +624,6 @@ static int ion_system_heap_debug_show(struct ion_heap *heap, struct seq_file *s,
 
 	return 0;
 }
-
 
 static void ion_system_heap_destroy_pools(struct ion_page_pool **pools)
 {
