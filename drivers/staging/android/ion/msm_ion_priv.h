@@ -78,9 +78,6 @@ static inline int ion_secure_cma_drain_pool(struct ion_heap *heap, void *unused)
 {
 	return -ENODEV;
 }
-
-
-
 #endif
 
 struct ion_heap *ion_removed_heap_create(struct ion_platform_heap *);
@@ -131,7 +128,6 @@ bool is_secure_vmid_valid(int vmid);
 
 int ion_system_secure_heap_unassign_sg(struct sg_table *sgt, int source_vmid);
 int ion_system_secure_heap_assign_sg(struct sg_table *sgt, int dest_vmid);
-
 
 /**
  * ion_create_chunked_sg_table - helper function to create sg table

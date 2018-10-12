@@ -287,16 +287,6 @@ int ion_system_secure_heap_assign_sg(struct sg_table *sgt, int dest_vmid);
 void ion_heap_init_shrinker(struct ion_heap *heap);
 
 /**
- * ion_heap_init_shrinker
- * @heap:		the heap
- *
- * If a heap sets the ION_HEAP_FLAG_DEFER_FREE flag or defines the shrink op
- * this function will be called to setup a shrinker to shrink the freelists
- * and call the heap's shrink op.
- */
-void ion_heap_init_shrinker(struct ion_heap *heap);
-
-/**
  * ion_heap_init_deferred_free -- initialize deferred free functionality
  * @heap:		the heap
  *
@@ -355,7 +345,6 @@ size_t ion_heap_freelist_drain_from_shrinker(struct ion_heap *heap,
  * @heap:		the heap
  */
 size_t ion_heap_freelist_size(struct ion_heap *heap);
-
 
 /**
  * functions for creating and destroying the built in ion heaps.
