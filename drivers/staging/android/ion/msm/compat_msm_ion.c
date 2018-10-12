@@ -137,8 +137,6 @@ static int compat_get_ion_prefetch_data(
 	return err;
 }
 
-
-
 static unsigned int convert_cmd(unsigned int cmd)
 {
 	switch (cmd) {
@@ -199,7 +197,6 @@ long compat_msm_ion_ioctl(struct ion_client *client, unsigned int cmd,
 
 		return msm_ion_custom_ioctl(client, convert_cmd(cmd),
 						(unsigned long)data);
-
 	}
 	default:
 		if (is_compat_task())

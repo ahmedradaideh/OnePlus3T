@@ -347,7 +347,6 @@ int ion_do_cache_op(struct ion_client *client, struct ion_handle *handle,
 					offset, len, cmd);
 
 	return ret;
-
 }
 
 static void msm_ion_allocate(struct ion_platform_heap *heap)
@@ -622,7 +621,6 @@ int ion_heap_allow_heap_secure(enum ion_heap_type type)
 
 bool is_secure_vmid_valid(int vmid)
 {
-
 	return (vmid == VMID_CP_TOUCH ||
 		vmid == VMID_CP_BITSTREAM ||
 		vmid == VMID_CP_PIXEL ||

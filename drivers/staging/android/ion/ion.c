@@ -42,7 +42,6 @@
 #include <linux/msm_dma_iommu_mapping.h>
 #include <trace/events/kmem.h>
 
-
 #include "ion.h"
 #include "ion_priv.h"
 #include "compat_ion.h"
