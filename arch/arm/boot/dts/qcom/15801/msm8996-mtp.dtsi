@@ -154,17 +154,6 @@
 		qcom,hw-settle-time = <2>;
 		qcom,fast-avg-setup = <0>;
 	};
-
-	chan@7c {
-		label = "xo_therm_buf";
-		reg = <0x7c>;
-		qcom,decimation = <0>;
-		qcom,pre-div-channel-scaling = <0>;
-		qcom,calibration-type = "ratiometric";
-		qcom,scale-function = <4>;
-		qcom,hw-settle-time = <2>;
-		qcom,fast-avg-setup = <0>;
-	};
 };
 
 &pm8994_adc_tm {
@@ -356,37 +345,13 @@
 	};
 };
 
-&i2c_12 {
-	synaptics_dsx@20 {
-		compatible = "synaptics,dsx-i2c";
-		reg = <0x20>;
-		status = "disabled"; //T0 use new TP and LCD
-		interrupt-parent = <&tlmm>;
-		interrupts = <125 0x2008>;
-		vdd_ana-supply = <&pm8994_l22>;
-		vcc_i2c-supply = <&pm8994_s4>;
-		synaptics,pwr-reg-name = "vdd_ana";
-		synaptics,bus-reg-name = "vcc_i2c";
-		synaptics,irq-gpio = <&tlmm 125 0x2008>;
-		synaptics,irq-on-state = <0>;
-		synaptics,irq-flags = <0x2008>; /* IRQF_ONESHOT | IRQF_TRIGGER_LOW */
-		synaptics,power-gpio = <&tlmm 49 0x00>;
-		synaptics,power-on-state = <1>;
-		synaptics,power-delay-ms = <200>;
-		synaptics,reset-delay-ms = <200>;
-		synaptics,max-y-for-2d = <1919>; /* remove if no virtual buttons */
-		// synaptics,vir-button-codes = <102 100 900 100 60 158 300 900 100 60>;
-		pinctrl-names = "pmx_ts_active", "pmx_ts_suspend";
-		pinctrl-0 = <&ts_active>;
-		pinctrl-1 = <&ts_suspend>;
-	};
-};
-
 &i2c_6 {
 	bq27541-battery@55 {
 		compatible = "ti,bq27541-battery";
 		status = "ok";
 		reg = <0x55>;
+		op,low-bat-voltage-uv = <3350000>;
+		op,low-bat-capacity = <10>;
 	};
 
 	oneplus_fastcg@26 {
@@ -861,10 +826,6 @@
 	};
 };
 
-&pmi8994_haptics {
-	status = "okay";
-};
-
 &flash_led {
 	qcom,follow-otst2-rb-disabled;
 };
@@ -1058,12 +1019,36 @@
 	/delete-property/ pinctrl-1;
 };
 
+&slim_msm {
+	tasha_codec {
+		qcom,cdc-micbias2-mv = <2700>;
+	};
+};
+
 &pcie1 {
 	status = "disabled";
 };
 
 &pcie2 {
 	status = "disabled";
+};
+
+&wdog {
+	qcom,bark-time = <11000>;
+};
+
+&qusb_phy0 {
+	qcom,qusb-phy-init-seq = <0x10 0x80
+				0x03 0x84
+				0x83 0x88
+				0xC7 0x8C
+				0x30 0x08
+				0x79 0x0C
+				0x21 0x10
+				0x14 0x9C
+				0x80 0x04
+				0x9F 0x1C
+				0x00 0x18>;
 };
 
 &qusb_phy1 {
@@ -1110,31 +1095,6 @@
 	 * lyb@bsp 11/17/15: 15801
 	 * never VDD_HDMI(L12/L28)
 	 */
-	status = "disabled";
-};
-
-// msm8996-sde.dtsi
-&sde_kms {
-	status = "disabled";
-};
-
-&sde_dsi0 {
-	status = "disabled";
-};
-
-&sde_dsi1 {
-	status = "disabled";
-};
-
-&sde_dsi_phy0 {
-	status = "disabled";
-};
-
-&sde_dsi_phy1 {
-	status = "disabled";
-};
-
-&sde_hdmi {
 	status = "disabled";
 };
 
@@ -1831,10 +1791,6 @@
 	rpm-regulator-ldoa14 {
 		status = "disabled";
 	};
-
-	rpm-regulator-ldoa18 {
-		/delete-node/ regulator-l18-pin-ctrl;
-	};
 };
 
 &pm8994_l3 {
@@ -1869,7 +1825,9 @@
 };
 
 &pm8994_l27 {
+	regulator-min-microvolt = <1200000>;
 	regulator-max-microvolt = <1200000>;
+	qcom,init-voltage = <1200000>;
 };
 
 // msm-pm8994.dtsi
@@ -2065,6 +2023,10 @@
 
 &lab_regulator {
 	com,qpnp-lab-max-precharge-time = <300>;
+};
+
+&pmi8994_wled {
+	status = "disabled";
 };
 
 &pmi8994_haptics {

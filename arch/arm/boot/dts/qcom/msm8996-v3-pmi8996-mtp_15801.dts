@@ -20,17 +20,5 @@
 / {
 	model = "Qualcomm Technologies, Inc. MSM 8996 v3 + PMI8996 MTP";
 	compatible = "qcom,msm8996-mtp", "qcom,msm8996", "qcom,mtp";
-	qcom,board-id = <8 0 15801 13>, <8 0 15801 14>, <8 0 15801 15>, <8 0 15801 16>;
-};
-
-&i2c_6 {
-	bq27541-battery@55 {
-		op,low-bat-voltage-uv = <3350000>;
-		op,low-bat-capacity = <10>;
-	};
-};
-
-&pm8994_l27 {
-	regulator-min-microvolt = <1200000>;
-	qcom,init-voltage = <1200000>;
+	qcom,board-id = <8 0 15801 15>, <8 0 15801 16>;
 };
