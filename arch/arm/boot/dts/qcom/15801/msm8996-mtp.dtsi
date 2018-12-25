@@ -604,15 +604,6 @@
 		#pinctrl-1 = <&tri_state_key_suspend>;
 	};
 
-	oneplus_rf_cable {
-		compatible = "oneplus,rf_cable";
-		interrupt-parent = <&tlmm>;
-		rf,cable-gpio = <&tlmm 131 0>;
-		#pinctrl-names = "pmx_tri_state_key_active", "pmx_tri_state_key_suspend";
-		#pinctrl-0 = <&tri_state_key_active>;
-		#pinctrl-1 = <&tri_state_key_suspend>;
-	};
-
 	i2c@7577000 { /* zhiguang.su@MultiMedia.AudioDrv, 2015/9/19, add for pa */
 		status = "ok";
 		test_tfa9890: tfa9890@36 {
