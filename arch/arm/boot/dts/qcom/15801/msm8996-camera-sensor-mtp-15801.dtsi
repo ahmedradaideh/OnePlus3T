@@ -25,14 +25,14 @@
 	actuator0: qcom,actuator@0 {
 		cell-index = <0>;
 		reg = <0x1c>;
-		compatible = "qcom,actuator"; // Rohm BU63165
+		compatible = "qcom,actuator"; /* Rohm BU63165 */
 		qcom,cci-master = <0>;
 	};
 
 	ois0: qcom,ois@0 {
 		cell-index = <0>;
 		reg = <0x1c>;
-		compatible = "qcom,ois"; // Rohm BU63165
+		compatible = "qcom,ois"; /* Rohm BU63165 */
 		qcom,cci-master = <0>;
 		cam_vaf-supply = <&pm8994_l23>;
 		qcom,cam-vreg-name = "cam_vaf";
@@ -50,54 +50,54 @@
 		qcom,cci-master = <0>;
 		qcom,num-blocks = <9>;
 		qcom,i2c-freq-mode = <1>;
-		
+
 		qcom,page0 = <0 0x0000 2 0x00 1 5>;
 		qcom,pageen0 = <0 0x0000 2 0x00 1 5>;
 		qcom,poll0 = <0 0x0000 2 0x00 1 5>;
 		qcom,saddr0 = <0xa0>;
 		qcom,mem0 = <0x0100 0x0000 2 0 1 0>;
-		
+
 		qcom,page1 = <0 0x0000 2 0x00 1 5>;
 		qcom,pageen1 = <0 0x0000 2 0x00 1 5>;
 		qcom,poll1 = <0 0x0000 2 0x00 1 5>;
 		qcom,saddr1 = <0xa0>;
 		qcom,mem1 = <0x0100 0x0100 2 0 1 0>;
-		
+
 		qcom,page2 = <0 0x0000 2 0x00 1 5>;
 		qcom,pageen2 = <0 0x0000 2 0x00 1 5>;
 		qcom,poll2 = <0 0x0000 2 0x00 1 5>;
 		qcom,saddr2 = <0xa0>;
 		qcom,mem2 = <0x0100 0x0200 2 0 1 0>;
-		
+
 		qcom,page3 = <0 0x0000 2 0x00 1 5>;
 		qcom,pageen3 = <0 0x0000 2 0x00 1 5>;
 		qcom,poll3 = <0 0x0000 2 0x00 1 5>;
 		qcom,saddr3 = <0xa0>;
 		qcom,mem3 = <0x0100 0x0300 2 0 1 0>;
-		
+
 		qcom,page4 = <0 0x0000 2 0x00 1 5>;
 		qcom,pageen4 = <0 0x0000 2 0x00 1 5>;
 		qcom,poll4 = <0 0x0000 2 0x00 1 5>;
 		qcom,saddr4 = <0xa0>;
 		qcom,mem4 = <0x0100 0x0400 2 0 1 0>;
-		
+
 		qcom,page5 = <0 0x0000 2 0x00 1 5>;
 		qcom,pageen5 = <0 0x0000 2 0x00 1 5>;
 		qcom,poll5 = <0 0x0000 2 0x00 1 5>;
 		qcom,saddr5 = <0xa0>;
-		qcom,mem5 = <0x0100 0x0500 2 0 1 0>;	
+		qcom,mem5 = <0x0100 0x0500 2 0 1 0>;
 
 		qcom,page6 = <0 0x0000 2 0x00 1 5>;
 		qcom,pageen6 = <0 0x0000 2 0x00 1 5>;
 		qcom,poll6 = <0 0x0000 2 0x00 1 5>;
 		qcom,saddr6 = <0xa0>;
-		qcom,mem6 = <0x0100 0x0600 2 0 1 0>;		
+		qcom,mem6 = <0x0100 0x0600 2 0 1 0>;
 
 		qcom,page7 = <0 0x0000 2 0x00 1 5>;
 		qcom,pageen7 = <0 0x0000 2 0x00 1 5>;
 		qcom,poll7 = <0 0x0000 2 0x00 1 5>;
 		qcom,saddr7 = <0xa0>;
-		qcom,mem7 = <0x0100 0x0700 2 0 1 0>;		
+		qcom,mem7 = <0x0100 0x0700 2 0 1 0>;	
 
 		qcom,page8 = <0 0x0000 2 0x00 1 5>;
 		qcom,pageen8 = <0 0x0000 2 0x00 1 5>;
@@ -126,19 +126,19 @@
 		qcom,cam-power-seq-type = "sensor_vreg","sensor_vreg", "sensor_vreg", "sensor_gpio", "sensor_clk";
 		qcom,cam-power-seq-val = "cam_vana", "cam_vdig", "cam_vio", "sensor_gpio_reset", "sensor_cam_mclk";
 		qcom,cam-power-seq-cfg-val = <0 0 0 1 24000000>;
-		qcom,cam-power-seq-delay =   <1 1 1 1 1>;
-                status = "ok";
+		qcom,cam-power-seq-delay = <1 1 1 1 1>;
+		status = "ok";
 		clocks = <&clock_mmss clk_mclk0_clk_src>,
 				<&clock_mmss clk_camss_mclk0_clk>;
 		clock-names = "cam_src_clk", "cam_clk";
 		qcom,clock-rates = <24000000 0>;
 	};
 
- 	// imx298
+	// imx298
 	qcom,camera@0 {
 		cell-index = <0>;
 		compatible = "qcom,camera";
-                qcom,pdaf-support = <1>;//chenneng
+		qcom,pdaf-support = <1>; /* chenneng */
 		reg = <0x0>;
 		qcom,csiphy-sd-index = <0>;
 		qcom,csid-sd-index = <0>;
@@ -146,7 +146,7 @@
 		qcom,led-flash-src = <&led_flash0>;
 		qcom,eeprom-src = <&eeprom0>;
 		qcom,actuator-src = <&actuator0>;
-		qcom,ois-src = <&ois0>;		
+		qcom,ois-src = <&ois0>;
 		cam_vdig-supply = <&pm8994_l3>;
 		cam_vio-supply = <&pm8994_lvs1>;
 		cam_vana-supply = <&pm8994_l17>;
@@ -190,7 +190,6 @@
 		qcom,num-blocks = <13>;
 		qcom,i2c-freq-mode = <1>;
 
-		// page 1
 		qcom,page0 = <1 0x0100 2 0 1 5>;
 		qcom,pageen0 = <0 0 2 0 1 5>;
 		qcom,poll0 = <0 0 2 0 1 5>;
@@ -202,7 +201,7 @@
 		qcom,poll1 = <0 0 2 0 1 5>;
 		qcom,saddr1 = <0x20>;
 		qcom,mem1 = <0 0 2 0 1 0>;
-		
+
 		qcom,page2 = <1 0x3383 2 0xa0 1 5>;
 		qcom,pageen2 = <0 0 2 0 1 5>;
 		qcom,poll2 = <0 0 2 0 1 5>;
@@ -245,7 +244,6 @@
 		qcom,saddr8 = <0x20>;
 		qcom,mem8 = <0x40 0x3404 2 0 1 0>;
 
-		// page 2
 		qcom,page9 = <1 0x3402 2 0x02 1 5>;
 		qcom,pageen9 = <0 0 2 0 1 5>;
 		qcom,poll9 = <0 0 2 0 1 5>;
@@ -258,7 +256,6 @@
 		qcom,saddr10 = <0x20>;
 		qcom,mem10 = <0x40 0x3404 2 0 1 0>;
 
-		// page 3
 		qcom,page11 = <1 0x3402 2 0x03 1 5>;
 		qcom,pageen11 = <0 0 2 0 1 5>;
 		qcom,poll11 = <0 0 2 0 1 5>;
@@ -271,7 +268,6 @@
 		qcom,saddr12 = <0x20>;
 		qcom,mem12 = <0x40 0x3404 2 0 1 0>;
 
-		// power
 		cam_vdig-supply = <&pm8994_l27>;
 		cam_vio-supply = <&pm8994_lvs1>;
 		cam_vana-supply = <&pm8994_l29>;
@@ -292,12 +288,10 @@
 					  "CAM_RESET2";
 		qcom,sensor-position = <1>;
 		qcom,sensor-mode = <1>;
-
 		qcom,cam-power-seq-type = "sensor_vreg","sensor_vreg", "sensor_vreg", "sensor_gpio", "sensor_clk";
 		qcom,cam-power-seq-val = "cam_vana", "cam_vio", "cam_vdig", "sensor_gpio_reset", "sensor_cam_mclk";
 		qcom,cam-power-seq-cfg-val = <0 0 0 1 24000000>;
-		qcom,cam-power-seq-delay =   <0 0 0 0 0>;
-
+		qcom,cam-power-seq-delay = <0 0 0 0 0>;
 		status = "ok";
 		clocks = <&clock_mmss clk_mclk2_clk_src>,
 			<&clock_mmss clk_camss_mclk2_clk>;
@@ -341,5 +335,4 @@
 		qcom,clock-rates = <24000000 0>;
 		support-front-camera = "IMX179";
 	};
-
 };

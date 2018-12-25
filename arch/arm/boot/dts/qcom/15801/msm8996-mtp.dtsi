@@ -27,11 +27,11 @@
 };
 
 &ufs_ice {
-        status = "ok";
+	status = "ok";
 };
 
 &sdcc1_ice {
-        status = "disabled";
+	status = "disabled";
 };
 
 &ufsphy1 {
@@ -128,17 +128,6 @@
 		qcom,pre-div-channel-scaling = <0>;
 		qcom,calibration-type = "ratiometric";
 		qcom,scale-function = <2>;
-		qcom,hw-settle-time = <2>;
-		qcom,fast-avg-setup = <0>;
-	};
-
-	chan@7c {
-		label = "xo_therm_buf";
-		reg = <0x7c>;
-		qcom,decimation = <0>;
-		qcom,pre-div-channel-scaling = <0>;
-		qcom,calibration-type = "ratiometric";
-		qcom,scale-function = <4>;
 		qcom,hw-settle-time = <2>;
 		qcom,fast-avg-setup = <0>;
 	};
@@ -302,7 +291,7 @@
 	pinctrl-1 = <&mdss_dsi_suspend &mdss_te_suspend &mdss_exits_suspend &mdss_err_suspend>;
 	qcom,platform-te-gpio = <&tlmm 11 0>;
 	qcom,platform-reset-gpio = <&tlmm 8 0>;
-	//qcom,platform-esd-te-gpio = <&tlmm 11 0>;
+	// qcom,platform-esd-te-gpio = <&tlmm 11 0>;
 	qcom,lcd-vddi-en-gpio = <&tlmm 26 0>;
 };
 
@@ -356,7 +345,7 @@
 		synaptics_dsx@20 {
 			compatible = "synaptics,dsx-i2c";
 			reg = <0x20>;
-			status = "disabled"; //T0 use new TP and LCD
+			status = "disabled"; /* T0 use new TP and LCD */
 			interrupt-parent = <&tlmm>;
 			interrupts = <125 0x2008>;
 			vdd_ana-supply = <&pm8994_l22>;
@@ -371,11 +360,10 @@
 			synaptics,power-delay-ms = <200>;
 			synaptics,reset-delay-ms = <200>;
 			synaptics,max-y-for-2d = <1919>; /* remove if no virtual buttons */
-			//synaptics,vir-button-codes = <102 100 900 100 60 158 300 900 100 60>;
-                        pinctrl-names = "pmx_ts_active", "pmx_ts_suspend";
-                        pinctrl-0 = <&ts_active>;
-                        pinctrl-1 = <&ts_suspend>;
-
+			// synaptics,vir-button-codes = <102 100 900 100 60 158 300 900 100 60>;
+			pinctrl-names = "pmx_ts_active", "pmx_ts_suspend";
+			pinctrl-0 = <&ts_active>;
+			pinctrl-1 = <&ts_suspend>;
 		};
 };
 
@@ -385,6 +373,7 @@
 		compatible = "ti,bq27541-battery";
 		reg = <0x55>;
 	};
+
 	oneplus_fastcg@26{
 		status = "ok";
 		compatible = "microchip,oneplus_fastcg";
@@ -409,7 +398,6 @@
 		clocks = <&clock_gcc clk_uart_snoc_msmbus_a_clk>,
 			 <&clock_gcc clk_uart_cnoc_msmbus_a_clk>;
 		clock-names = "snoc", "cnoc";
-
 	};
 };
 
@@ -422,7 +410,6 @@
 };
 
 &pm8994_mpps {
-
 	mpp@a300 { /* MPP 4 */
 		/* HDMI_5v_vreg regulator enable */
 		qcom,mode = <1>;		/* Digital output */
@@ -436,24 +423,23 @@
 };
 
 &pmi8994_gpios {
-		gpio@c400 {//pmi8996 gpio 5 type-c IC INT pin
-			qcom,mode = <0>;
-			qcom,pull = <5>;
-			qcom,vin-sel = <2>;
-			qcom,src-sel = <0>;
-			qcom,master-en = <1>;
-			status = "okay";
+	gpio@c400 { /* pmi8996 gpio 5 type-c IC INT pin */
+		qcom,mode = <0>;
+		qcom,pull = <5>;
+		qcom,vin-sel = <2>;
+		qcom,src-sel = <0>;
+		qcom,master-en = <1>;
+		status = "okay";
+	};
 
-		};
-
-		gpio@c500 {//pmi8996 gpio 6 type-c IC OTG_USB_ID pin
-			qcom,mode = <0>;
-			qcom,pull = <5>;
-			qcom,vin-sel = <2>;
-			qcom,src-sel = <0>;
-			qcom,master-en = <1>;
-			status = "okay";
-		};
+	gpio@c500 { /* pmi8996 gpio 6 type-c IC OTG_USB_ID pin */
+		qcom,mode = <0>;
+		qcom,pull = <5>;
+		qcom,vin-sel = <2>;
+		qcom,src-sel = <0>;
+		qcom,master-en = <1>;
+		status = "okay";
+	};
 };
 
 &pmi8994_gpios {
@@ -552,6 +538,7 @@
 			clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
 				 <&clock_gcc clk_gcc_blsp2_qup1_i2c_apps_clk>;
 		};
+
 		tusb320@60 {
 			compatible = "tusb320";
 			reg = <0x60>;
@@ -573,7 +560,6 @@
 			clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
 				 <&clock_gcc clk_gcc_blsp2_qup1_i2c_apps_clk>;
 		};
-
 	};
 
 	tri_state_key {
@@ -591,7 +577,7 @@
 	fpc_fpc1020 {
 		compatible = "fpc,fpc1020";
 		interrupt-parent = <&tlmm>;
-		fpc,reset-gpio    = <&tlmm 86 0>;
+		fpc,reset-gpio  = <&tlmm 86 0>;
 		fpc,irq-gpio    = <&tlmm 95 0>;
 		fpc,gpio_id0    = <&tlmm 25 0>;
 		fpc,gpio_id1    = <&tlmm 143 0>;
@@ -605,14 +591,14 @@
 		#pinctrl-1 = <&tri_state_key_suspend>;
 	};
 
-	i2c@7577000{
-	    status = "ok";
-        test_tfa9890:     tfa9890@36 {
-		  compatible = "nxp,tfa9890";
-		  reg = <0x36>;
-		  reset_gpio= <&tlmm 16 0>;
-		  status = "okay";
-		 };
+	i2c@7577000 {
+		status = "ok";
+		test_tfa9890:	tfa9890@36 {
+			compatible = "nxp,tfa9890";
+			reg = <0x36>;
+			reset_gpio = <&tlmm 16 0>;
+			status = "okay";
+		};
 	};
 
 	gen-vkeys {
@@ -636,6 +622,7 @@
 			linux,code = <115>;
 			debounce-interval = <15>;
 		};
+
 		vol_down {
 			label = "volume_down";
 			gpios = <&pm8994_gpios 2 0x1>;
@@ -703,14 +690,14 @@
 
 	gpio_switch {
 		compatible = "oneplus,gpio_switch";
-        gpios = <&tlmm  97 0x00>,
-                <&tlmm  98 0x00>,
-                <&tlmm 100 0x00>,
-			    <&tlmm 115 0x00>,
-			    <&tlmm 127 0x00>,
-			    <&tlmm 133 0x00>,
-			    <&tlmm 136 0x00>;
-        pinctrl-names = "gpio_switch_pin_active", "gpio_switch_pin_suspend";
+		gpios = <&tlmm  97 0x00>,
+				<&tlmm  98 0x00>,
+				<&tlmm 100 0x00>,
+				<&tlmm 115 0x00>,
+				<&tlmm 127 0x00>,
+				<&tlmm 133 0x00>,
+				<&tlmm 136 0x00>;
+		pinctrl-names = "gpio_switch_pin_active", "gpio_switch_pin_suspend";
 		pinctrl-0 = <&pmx_gpio_switch_pin_active>;
 		pinctrl-1 = <&pmx_gpio_switch_pin_suspend>;
 	};
@@ -760,13 +747,14 @@
 	gpio@cd00 { /* GPIO 14 - lcd_bklt_reg_en */
 		qcom,mode = <1>;	/* DIGITAL OUT */
 		qcom,output-type = <0>;		/* CMOS logic */
-		qcom,invert = <1>; 	/* output hight initially */
+		qcom,invert = <1>;	/* output hight initially */
 		qcom,vin-sel = <2>;	/* 1.8 */
 		qcom,src-sel = <0>;	/* CONSTANT */
 		qcom,out-strength = <1>;	/* Low drive strength */
 		qcom,master-en = <1>;	/* ENABLE GPIO */
 		status = "okay";
 	};
+
 	gpio@c100 { /* GPIO 2 */
 		qcom,mode = <0>;
 		qcom,pull = <0>;
@@ -851,10 +839,6 @@
 	};
 };
 
-&pmi8994_haptics {
-	status = "okay";
-};
-
 &flash_led {
 	qcom,follow-otst2-rb-disabled;
 };
@@ -880,12 +864,13 @@
 		synaptics,reset-gpio = <&tlmm 76 0x00>;
 		vdd_2v8-supply = <&pm8994_l13>;
 		vcc_i2c_1v8-supply = <&pm8994_s4>;
-		oem,cover_reject;//when esd test cover the phone on the panel don't report keys;
+		oem,cover_reject; /* when esd test cover the phone on the panel don't report keys */
 
 		pinctrl-names = "pmx_tk_active", "pmx_tk_suspend";
 		pinctrl-0 = <&tk_active>;
 		pinctrl-1 = <&tk_suspend>;
 	};
+
 	nq@28 {
 		compatible = "nxp,pn544";
 		reg = <0x28>;
@@ -905,16 +890,16 @@
 };
 
 &spi_0 { /* BLSP1 QUP1 */
-        p61-nxp-nfc@1 { //Slave driver and CS ID
-                compatible = "nxp,p61"; //Manufacture, and Model
-                reg = <1>; //Same as CS ID
-                nxp,p61-irq = <&tlmm 34 0x00>; //Pass a GPIO
-                nxp,p61-rst = <&tlmm 21 0x00>; //Pass a GPIO
-                spi-max-frequency = <19200000>;
-                spi-cs-high; //CS Active High
-                interrupt-parent = <&tlmm>; //GPIO Handler
-                interrupts = <34 0>; //GPIO # and flags
-        };
+	p61-nxp-nfc@1 { /* Slave driver and CS ID */
+		compatible = "nxp,p61"; //Manufacture, and Model
+		reg = <1>; //Same as CS ID
+		nxp,p61-irq = <&tlmm 34 0x00>; //Pass a GPIO
+		nxp,p61-rst = <&tlmm 21 0x00>; //Pass a GPIO
+		spi-max-frequency = <19200000>;
+		spi-cs-high; //CS Active High
+		interrupt-parent = <&tlmm>; //GPIO Handler
+		interrupts = <34 0>; //GPIO # and flags
+	};
 };
 
 // msm8996.dtsi
@@ -941,13 +926,13 @@
 };
 
 &i2c_6 { /* BLSP1 QUP6 */
-		qcom,clk-freq-out = <100000>;	/* Yangfb modyfied, old value is 400000*/
-		qcom,fs-clk-div =<104>;/* Yangfb modyfied*/
-		qcom,high-time-clk-div=<82>;/* Yangfb modyfied*/
+		qcom,clk-freq-out = <100000>; /* Yangfb modyfied, old value is 400000 */
+		qcom,fs-clk-div =<104>; /* Yangfb modyfied */
+		qcom,high-time-clk-div=<82>; /* Yangfb modyfied */
 };
 
 &soc {
-	i2c_3: i2c@7577000 { /* BLSP2 QUP1 */ //////////////here is BLSP1 QUP2 (0-5)
+	i2c_3: i2c@7577000 { /* BLSP2 QUP1, here is BLSP1 QUP2 (0-5) */
 			compatible = "qcom,i2c-msm-v2";
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -976,7 +961,10 @@
 	};
 
 	qcom,qbt1000 {
-		/*zuoyonghua@connectivity 2015 12 07 we don't used qrd default fingerprint-sensor,so disable it*/
+		/*
+		 * zuoyonghua@connectivity 2015 12 07 we don't used
+		 * qrd default fingerprint-sensor,so disable it
+		 */
 		status = "disabled";
 	};
 
@@ -999,7 +987,6 @@
 			qcom,msm-mi2s-slave = <0>;
 			qcom,msm-mi2s-ext-mclk = <0>;
 			pinctrl-names = "default", "sleep";
-
 			pinctrl-0 = <&quat_mi2s_active  &quat_mi2s_sd0_active &quat_mi2s_sd1_active >;
 			pinctrl-1 = <&quat_mi2s_sleep  &quat_mi2s_sd0_sleep &quat_mi2s_sd1_sleep >;
 		};
@@ -1020,15 +1007,15 @@
 };
 
 &pcie1 {
-		status = "disabled";
+	status = "disabled";
 };
 
 &pcie2 {
-		status = "disabled";
+	status = "disabled";
 };
 
 &qusb_phy1 {
-		status = "disabled";
+	status = "disabled";
 };
 
 // msm8996-ipcrouter.dtsi
@@ -1051,7 +1038,7 @@
 
 &mdss_dsi0 {
 	oled-vdda-supply = <&pm8994_s5>;
-	vddio-supply = <&pm8994_l18>;//power provide 3.3V
+	vddio-supply = <&pm8994_l18>; /* power provide 3.3V */
 	/delete-property/ lab-supply;
 	/delete-property/ ibb-supply;
 };
@@ -1060,13 +1047,13 @@
 	status = "disabled";
 };
 
-//msm8996-mdss-pll.dtsi
+// msm8996-mdss-pll.dtsi
 &mdss_hdmi_pll {
-	/*lyb@bsp 11/17/15: 15801 never VDD_HDMI(L12/L28)*/
+	/* lyb@bsp 11/17/15: 15801 never VDD_HDMI(L12/L28) */
 	status = "disabled";
 };
 
-//msm8996-sde.dtsi
+// msm8996-sde.dtsi
 &sde_kms {
 	status = "disabled";
 };
@@ -1091,7 +1078,7 @@
 	status = "disabled";
 };
 
-//msm8996-pinctrl.dtsi start
+// msm8996-pinctrl.dtsi start
 &tlmm {
 	uart_console_deactive: uart_console_deactive {
 		mux {
@@ -1106,11 +1093,12 @@
 		};
 	};
 
-		mdss_exits_active: mdss_exits_active {
+	mdss_exits_active: mdss_exits_active {
 			mux {
 				pins = "gpio33";
 				function = "gpio";
 			};
+
 			config {
 				pins = "gpio33";
 				drive-strength = <2>; /* 8 mA */
@@ -1118,12 +1106,12 @@
 			};
 		};
 
-
 		mdss_exits_suspend: mdss_exits_suspend {
 			mux {
 				pins = "gpio33";
 				function = "gpio";
 			};
+
 			config {
 				pins = "gpio33";
 				drive-strength = <2>; /* 2 mA */
@@ -1136,6 +1124,7 @@
 				pins = "gpio24";
 				function = "gpio";
 			};
+
 			config {
 				pins = "gpio24";
 				drive-strength = <2>; /* 8 mA */
@@ -1143,12 +1132,12 @@
 			};
 		};
 
-
 		mdss_err_suspend: mdss_err_suspend {
 			mux {
 				pins = "gpio24";
 				function = "gpio";
 			};
+
 			config {
 				pins = "gpio24";
 				drive-strength = <2>; /* 2 mA */
@@ -1182,6 +1171,7 @@
 				bias-disable;
 			};
 		};
+
 		usb_sw_active: usb_sw_active {
 			mux {
 				pins = "gpio135";
@@ -1194,6 +1184,7 @@
 				bias-pull-up;
 			};
 		};
+
 		ap_clk_suspend: ap_clk_suspend {
 			mux {
 				pins = "gpio75";
@@ -1206,6 +1197,7 @@
 				bias-disable;
 			};
 		};
+
 		ap_clk_active: ap_clk_active {
 			mux {
 				pins = "gpio75";
@@ -1218,6 +1210,7 @@
 				bias-pull-up;
 			};
 		};
+
 		ap_data_suspend: ap_data_suspend {
 			mux {
 				pins = "gpio74";
@@ -1230,6 +1223,7 @@
 				bias-disable;
 			};
 		};
+
 		ap_data_active: ap_data_active {
 			mux {
 				pins = "gpio74";
@@ -1242,6 +1236,7 @@
 				bias-pull-up;
 			};
 		};
+
 		usb_sw_suspend: usb_sw_suspend {
 			mux {
 				pins = "gpio135";
@@ -1256,31 +1251,31 @@
 		};
 	};
 
-    nfc_spi_irq_active: nfc_spi_irq_active {
-       mux {
-            pins = "gpio34";
-            function = "gpio";
-        };
+		nfc_spi_irq_active: nfc_spi_irq_active {
+			mux {
+				pins = "gpio34";
+				function = "gpio";
+			};
 
-       config {
-            pins = "gpio34";
-            drive-strength = <16>;
-            bias-pull-up;
-        };
-     };
+			config {
+				pins = "gpio34";
+				drive-strength = <16>;
+				bias-pull-up;
+			};
+		};
 
-     nfc_spi_irq_suspend: nfc_spi_irq_suspend {
-        mux {
-            pins = "gpio34";
-            function = "gpio";
-        };
+		nfc_spi_irq_suspend: nfc_spi_irq_suspend {
+			mux {
+				pins = "gpio34";
+				function = "gpio";
+			};
 
-       config {
-            pins = "gpio34";
-            drive-strength = <2>;
-            bias-disable;
-        };
-    };
+			config {
+				pins = "gpio34";
+				drive-strength = <2>;
+				bias-disable;
+			};
+		};
 
 	tri_state_key_mux {
 		tri_state_key_active: tri_state_key_active {
@@ -1351,6 +1346,7 @@
 				bias-pull-down;         /* PULL DOWN */
 			};
 		};
+
 		quat_mi2s_mclk_active: quat_mi2s_mclk_active {
 			mux {
 				pins = "gpio57";
@@ -1395,6 +1391,7 @@
 		};
 	};
 };
+
 &ts_active {
 	mux {
 		pins = "gpio89", "gpio125","gpio49";
@@ -1791,31 +1788,38 @@
 		/delete-node/ regulator-l18-pin-ctrl;
 	};
 };
+
 &pm8994_l3 {
 	regulator-min-microvolt = <1100000>;
 	regulator-max-microvolt = <1100000>;
 	qcom,init-voltage = <1100000>;
 };
+
 &pm8994_l13 {
 	regulator-min-microvolt = <2950000>;
 };
+
 &pm8994_l14 {
 	status = "disabled";
 };
+
 &pm8994_l17 {
 	regulator-min-microvolt = <2600000>;
 	regulator-max-microvolt = <2600000>;
 	qcom,init-voltage = <2600000>;
 };
-&pm8994_l18 {  //guozhiming modify for lcd 2015-10-15
+
+&pm8994_l18 {  /* guozhiming modify for lcd 2015-10-15 */
 	regulator-min-microvolt = <3300000>;
 	regulator-max-microvolt = <3300000>;
 	qcom,init-voltage = <3300000>;
 };
+
 &pm8994_l22 {
 	regulator-min-microvolt = <3000000>;
 	qcom,init-voltage = <3000000>;
 };
+
 &pm8994_l27 {
 	regulator-max-microvolt = <1200000>;
 };
@@ -1832,29 +1836,32 @@
 		};
 	};
 };
+
 &pm8994_mpps {
 	/* Configure MPP2 as an Analog input to AMUX6 and read from channel 0x11 */
 	mpp@a100 { /* MPP 2 */
 		qcom,mode = <4>; /* AIN input */
-		//qcom,invert = <1>; /* Enable MPP */
+		// qcom,invert = <1>; /* Enable MPP */
 		qcom,ain-route = <1>; /* AMUX 6 ,QPNP_PIN_AIN_AMUX_CH6   = 1*/
 		qcom,master-en = <1>; /* Enable MPP */
 		qcom,src-sel = <0>; /* Function constant */
 		/delete-property/ status;
 	};
+
 	/* Configure MPP5 as an Analog input to AMUX5 and read from channel 0x14 */
 	mpp@a400 { /* MPP 5 */
 		qcom,mode = <4>; /* AIN input */
-		//qcom,invert = <1>; /* Enable MPP */
+		// qcom,invert = <1>; /* Enable MPP */
 		qcom,ain-route = <0>; /* AMUX 5 ,QPNP_PIN_AIN_AMUX_CH5   = 0*/
 		qcom,master-en = <1>; /* Enable MPP */
 		qcom,src-sel = <0>; /* Function constant */
 		/delete-property/ status;
 	};
+
 	/* Configure MPP7 as an Analog input to AMUX7 and read from channel 0x16 */
 	mpp@a600 { /* MPP 7 */
 		qcom,mode = <4>; /* AIN input */
-		//qcom,invert = <1>; /* Enable MPP */
+		// qcom,invert = <1>; /* Enable MPP */
 		qcom,ain-route = <2>; /* AMUX 7 ,QPNP_PIN_AIN_AMUX_CH7   = 2*/
 		qcom,master-en = <1>; /* Enable MPP */
 		qcom,src-sel = <0>; /* Function constant */
@@ -1864,7 +1871,7 @@
 	/* Configure MPP8 as an Analog input to AMUX8 and read from channel 0x17 */
 	mpp@a700 { /* MPP 8 */
 		qcom,mode = <4>; /* AIN input */
-		//qcom,invert = <1>; /* Enable MPP */
+		// qcom,invert = <1>; /* Enable MPP */
 		qcom,ain-route = <3>; /* AMUX 6 ,QPNP_PIN_AIN_AMUX_CH8   = 3*/
 		qcom,master-en = <1>; /* Enable MPP */
 		qcom,src-sel = <0>; /* Function constant */
@@ -1878,13 +1885,14 @@
 		label = "pcb_version_AMUX_HW_ID";
 		reg = <0x76>;//pcb_version_AMUX_HW_ID channel 54
 		qcom,decimation = <0>;
-		qcom,pre-div-channel-scaling = <0>; //Use 1:1 scaling to keep input voltage with in Max voltage: 1.8V
-		//qcom,calibration-type = "ratiometric";
+		qcom,pre-div-channel-scaling = <0>; /* Use 1:1 scaling to keep input voltage with in Max voltage: 1.8V */
+		// qcom,calibration-type = "ratiometric";
 		qcom,calibration-type = "absolute";
 		qcom,scale-function = <0>;
 		qcom,hw-settle-time = <0>;
 		qcom,fast-avg-setup = <0>;
 	};
+
 	chan@11 {
 		label = "rf_mpp2";
 		reg = <0x11>;
@@ -1895,6 +1903,7 @@
 		qcom,hw-settle-time = <0>;
 		qcom,fast-avg-setup = <0>;
 	};
+
 	chan@14 {
 		label = "rf_mpp5";
 		reg = <0x14>;
@@ -1905,6 +1914,7 @@
 		qcom,hw-settle-time = <0>;
 		qcom,fast-avg-setup = <0>;
 	};
+
 	chan@16 {
 		label = "id_ant_pcba_mpp7";
 		reg = <0x16>;
@@ -1915,6 +1925,7 @@
 		qcom,hw-settle-time = <0>;
 		qcom,fast-avg-setup = <0>;
 	};
+
 	chan@17 {
 		label = "rf_mpp8";
 		reg = <0x17>;
@@ -1926,6 +1937,7 @@
 		qcom,fast-avg-setup = <0>;
 	};
 };
+
 &pm8994_rtc {
 	qcom,qpnp-rtc-alarm-pwrup = <1>;
 };
@@ -2056,12 +2068,15 @@
 &pmi8994_flash0 {
 	qcom,current = <507>;
 };
+
 &pmi8994_flash1 {
 	qcom,current = <507>;
 };
+
 &pmi8994_torch0 {
 	qcom,current = <48>;
 };
+
 &pmi8994_torch1 {
 	qcom,current = <48>;
 };
