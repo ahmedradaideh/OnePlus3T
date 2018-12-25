@@ -17,7 +17,7 @@
  *---------------------------------------------------------------------------*/
 &mdss_mdp {
 	dsi_samsung_s6e3fa5_1080p_cmd: qcom,mdss_dsi_samsung_s6e3fa5_1080p_cmd {
-//	qcom,cont-splash-enabled;
+		// qcom,cont-splash-enabled;
 		qcom,mdss-dsi-panel-name = "samsung s6e3fa5 1080p cmd mode dsi panel";
 		qcom,mdss-dsi-panel-manufacture = "SAMSUNG";
 		qcom,mdss-dsi-panel-version = "S6E3FA5";
@@ -94,16 +94,16 @@
 		qcom,mdss-dsi-lp11-init;
 		qcom,mdss-dsi-init-delay-us = <10000>;
 		qcom,mdss-dsi-reset-sequence = <1 2>,<0 2>, <1 10>;
-		/*qcom,mdss-dsi-panel-inverted;*/
+		/* qcom,mdss-dsi-panel-inverted; */
 		qcom,mdss-pan-physical-width-dimension = <68>;
 		qcom,mdss-pan-physical-height-dimension = <122>;
 		qcom,mdss-tear-check-frame-rate=<6000>;
-		//qcom,mdss-tear-check-sync-cfg-height = <1932>; /* Height + VBP + VFP + VSW */
-		//qcom,mdss-tear-check-sync-init-val= <1920>; /* Height */
-	       // qcom,mdss-tear-check-sync-threshold-start = <4>;
-	       // qcom,mdss-tear-check-sync-threshold-continue = <4>;
-	       // qcom,mdss-tear-check-start-pos= <1920>; /* Height */
-	       // qcom,mdss-tear-check-rd-ptr-trigger-intr= <1921>; /* Height + 1 */
+		// qcom,mdss-tear-check-sync-cfg-height = <1932>; /* Height + VBP + VFP + VSW */
+		// qcom,mdss-tear-check-sync-init-val = <1920>; /* Height */
+		// qcom,mdss-tear-check-sync-threshold-start = <4>;
+		// qcom,mdss-tear-check-sync-threshold-continue = <4>;
+		// qcom,mdss-tear-check-start-pos = <1920>; /* Height */
+		// qcom,mdss-tear-check-rd-ptr-trigger-intr = <1921>; /* Height + 1 */
 
 		qcom,mdss-dsi-high-brightness-panel;
 		qcom,mdss-dsi-panel-acl-command = [15 01 00 00 00 00 02 55 00];
