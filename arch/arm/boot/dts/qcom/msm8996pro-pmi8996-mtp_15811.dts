@@ -10,13 +10,12 @@
  * GNU General Public License for more details.
  */
 
-
 /dts-v1/;
 
 #include "msm8996pro.dtsi"
 #include "msm-pmi8996.dtsi"
 #include "15801/msm8996-mtp.dtsi"
-#include "15801/msm8996-camera-sensor-mtp-15811.dtsi"
+#include "15801/msm8996-camera-sensor-mtp_15811.dtsi"
 
 / {
 	model = "Qualcomm Technologies, Inc. MSM 8996pro + PMI8996 MTP";
@@ -27,8 +26,8 @@
 &i2c_6 {
 	bq27541-battery@55 {
 		oem,support-4p4v-battery;
-		op,low-bat-voltage-uv=<3250000>;
-		op,low-bat-capacity=<20>;
+		op,low-bat-voltage-uv = <3250000>;
+		op,low-bat-capacity = <20>;
 	};
 };
 
