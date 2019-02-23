@@ -132,8 +132,6 @@ ENTRY(flush_cache_all)
 	ret	x12
 ENDPROC(flush_cache_all)
 
-
-
 /*
  *	flush_icache_range(start,end)
  *

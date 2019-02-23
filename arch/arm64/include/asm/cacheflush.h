@@ -41,6 +41,10 @@
  *	the implementation assumes non-aliasing VIPT D-cache and (aliasing)
  *	VIPT or ASID-tagged VIVT I-cache.
  *
+ *	flush_cache_all()
+ *
+ *		Unconditionally clean and invalidate the entire cache.
+ *
  *	flush_cache_mm(mm)
  *
  *		Clean and invalidate all user space cache entries
@@ -163,10 +167,6 @@ int set_memory_ro(unsigned long addr, int numpages);
 int set_memory_rw(unsigned long addr, int numpages);
 int set_memory_x(unsigned long addr, int numpages);
 int set_memory_nx(unsigned long addr, int numpages);
-
-#ifdef CONFIG_DEBUG_RODATA
-void mark_rodata_ro(void);
-#endif
 
 #ifdef CONFIG_KERNEL_TEXT_RDONLY
 void set_kernel_text_ro(void);
