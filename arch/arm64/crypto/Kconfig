@@ -1,4 +1,3 @@
-
 menuconfig ARM64_CRYPTO
 	bool "ARM64 Accelerated Cryptographic Algorithms"
 	depends on ARM64

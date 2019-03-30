@@ -9,6 +9,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+
 #include <linux/slab.h>
 #include <linux/kthread.h>
 #include <linux/kernel.h>
@@ -29,7 +30,6 @@
 #include <sound/adsp_err.h>
 
 #define TIMEOUT_MS 300
-
 
 #define CMD_STATUS_SUCCESS 0
 #define CMD_STATUS_FAIL 1

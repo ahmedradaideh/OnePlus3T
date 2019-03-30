@@ -25,7 +25,6 @@
 #include "u_serial.h"
 #include "gadget_chips.h"
 
-
 /*
  * This CDC ACM function support just wraps control functions and
  * notifications around the generic serial-over-usb code.

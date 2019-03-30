@@ -1675,4 +1675,3 @@ struct hdmi_hdcp_ops *hdmi_hdcp_start(void *input)
 {
 	return ((struct hdmi_hdcp_ctrl *)input)->ops;
 }
-

@@ -105,7 +105,6 @@ config INPUT_MOUSEDEV_PSAUX
 
 	  If unsure, say Y.
 
-
 config INPUT_MOUSEDEV_SCREEN_X
 	int "Horizontal screen resolution"
 	depends on INPUT_MOUSEDEV
@@ -208,6 +207,8 @@ source "drivers/input/touchscreen/Kconfig"
 
 source "drivers/input/misc/Kconfig"
 
+source "drivers/input/sensors/smi130/Kconfig"
+
 endif
 
 menu "Hardware I/O ports"
@@ -219,4 +220,3 @@ source "drivers/input/gameport/Kconfig"
 endmenu
 
 endmenu
-

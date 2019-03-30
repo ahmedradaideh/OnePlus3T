@@ -9,6 +9,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+
 #include <linux/slab.h>
 #include <linux/wait.h>
 #include <linux/sched.h>
@@ -1653,7 +1654,7 @@ static int adm_memory_map_regions(phys_addr_t *buf_add, uint32_t mempool_id,
 						0xFFFFFFFF, &this_adm);
 		if (this_adm.apr == NULL) {
 			pr_err("%s: Unable to register ADM\n", __func__);
-			ret = -ENODEV;
+			ret = -ENETRESET;
 			return ret;
 		}
 		rtac_set_adm_handle(this_adm.apr);

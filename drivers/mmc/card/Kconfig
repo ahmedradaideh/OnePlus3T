@@ -87,4 +87,3 @@ config MMC_BLOCK_TEST
 	  device.
 	  Currently used to test eMMC 4.5 features (packed commands, sanitize,
 	  BKOPs).
-

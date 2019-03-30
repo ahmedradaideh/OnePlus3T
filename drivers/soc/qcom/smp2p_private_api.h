@@ -11,6 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+
 #ifndef _ARCH_ARM_MACH_MSM_SMP2P_PRIVATE_API_H_
 #define _ARCH_ARM_MACH_MSM_SMP2P_PRIVATE_API_H_
 

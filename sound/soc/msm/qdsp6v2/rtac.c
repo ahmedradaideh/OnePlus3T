@@ -31,12 +31,11 @@
 #include "msm-pcm-routing-v2.h"
 #include <sound/adsp_err.h>
 
-
 /* Max size of payload (buf size - apr header) */
 #define MAX_PAYLOAD_SIZE		4076
 #define RTAC_MAX_ACTIVE_VOICE_COMBOS	2
 #define RTAC_MAX_ACTIVE_POPP		8
-#define RTAC_BUF_SIZE			163840
+#define RTAC_BUF_SIZE			57344
 
 #define TIMEOUT_MS	1000
 
@@ -119,7 +118,6 @@ struct rtac_afe_user_data {
 static struct rtac_voice	rtac_voice_data;
 static u32			*rtac_voice_buffer;
 static u32			voice_session_id[RTAC_MAX_ACTIVE_VOICE_COMBOS];
-
 
 struct mutex			rtac_adm_mutex;
 struct mutex			rtac_adm_apr_mutex;
