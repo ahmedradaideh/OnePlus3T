@@ -1935,7 +1935,7 @@ static int32_t q6asm_callback(struct apr_client_data *data, void *priv)
 				pr_debug("%s: Invalid token buffer index %u\n",
 					__func__, data->token);
 				spin_unlock_irqrestore(&port->dsp_lock,
-								dsp_flags);
+						dsp_flags);
 				spin_unlock_irqrestore(
 					&(session[session_id].session_lock),
 					flags);
@@ -1948,11 +1948,11 @@ static int32_t q6asm_callback(struct apr_client_data *data, void *priv)
 					port->buf[data->token].phys) !=
 						payload[1])) {
 				pr_debug("%s: Expected addr %pK\n",
-				__func__, &port->buf[data->token].phys);
+					__func__, &port->buf[data->token].phys);
 				pr_err("%s: rxedl[0x%x] rxedu [0x%x]\n",
 					__func__, payload[0], payload[1]);
 				spin_unlock_irqrestore(&port->dsp_lock,
-								dsp_flags);
+						dsp_flags);
 				spin_unlock_irqrestore(
 					&(session[session_id].session_lock),
 					flags);
@@ -1967,7 +1967,6 @@ static int32_t q6asm_callback(struct apr_client_data *data, void *priv)
 			for (i = 0; i < port->max_buf_cnt; i++)
 				dev_vdbg(ac->dev, "%s %d\n",
 					__func__, port->buf[i].used);
-
 		}
 		break;
 	}
@@ -3378,7 +3377,7 @@ int q6asm_open_shared_io(struct audio_client *ac,
 
 	if (config->channels > PCM_FORMAT_MAX_NUM_CHANNEL) {
 		pr_err("%s: Invalid channel count %d\n", __func__,
-		       config->channels);
+			config->channels);
 		return -EINVAL;
 	}
 
@@ -3849,7 +3848,7 @@ int q6asm_set_encdec_chan_map(struct audio_client *ac,
 
 	if (num_channels > MAX_CHAN_MAP_CHANNELS) {
 		pr_err("%s: Invalid channel count %d\n", __func__,
-			num_channels);
+				num_channels);
 		return -EINVAL;
 	}
 
@@ -4284,7 +4283,6 @@ int q6asm_enc_cfg_blk_pcm_native(struct audio_client *ac,
 	struct asm_multi_channel_pcm_enc_cfg_v2  enc_cfg;
 	u8 *channel_mapping;
 	u32 frames_per_buf = 0;
-
 	int rc = 0;
 
 	if (channels > PCM_FORMAT_MAX_NUM_CHANNEL) {

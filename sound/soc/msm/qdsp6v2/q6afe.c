@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2016, 2019 The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2019, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -335,7 +335,10 @@ static int32_t afe_callback(struct apr_client_data *data, void *priv)
 		if (sp_make_afe_callback(data->payload, data->payload_size))
 			return -EINVAL;
 
-		wake_up(&this_afe.wait[data->token]);
+		if (afe_token_is_valid(data->token))
+			wake_up(&this_afe.wait[data->token]);
+		else
+			return -EINVAL;
 	} else if (data->payload_size) {
 		uint32_t *payload;
 		uint16_t port_id = 0;
