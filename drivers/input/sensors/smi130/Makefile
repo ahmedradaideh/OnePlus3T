@@ -38,10 +38,3 @@ obj-y  += smi130_i2c.o
 EXTRA_CFLAGS += -DSMI_USE_BASIC_I2C_FUNC
 
 obj-$(CONFIG_SENSORS_SMI130_SPI)  += smi130_spi.o
-
-
-
-
-
-
-

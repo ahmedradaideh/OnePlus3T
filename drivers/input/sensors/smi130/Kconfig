@@ -1,6 +1,17 @@
 #
 # Makefile for Bosch sensors driver.
 #
+
+menuconfig SMI130
+	bool "Enable smi130 drivers"
+	help
+	Say Y here, and a list of smi130 drivers will be displayed.
+	This option does not affect the kernel.
+
+	If unsure, say N.
+
+if SMI130
+
 config BOSCH_DRIVER_LOG_FUNC
 	tristate "Bosch Sensortec driver smart log function support"
 	depends on (I2C || SPI_MASTER) && SYSFS
@@ -94,16 +105,19 @@ config SENSORS_SMI_ACC420
 	depends on I2C || SPI_MASTER
 	help
 	If you say yes here, you get support for Bosch Sensortec's sensor driver of SMI_ACC420.
+
 config SENSORS_SMI_ACC421
 	tristate "SMI_ACC4XY Sensor Support"
 	depends on I2C || SPI_MASTER
 	help
 	If you say yes here, you get support for Bosch Sensortec's sensor driver of SMI_ACC421.
+
 config SENSORS_SMI_ACC422
 	tristate "SMI_ACC4XY Sensor Support"
 	depends on I2C || SPI_MASTER
 	help
 	If you say yes here, you get support for Bosch Sensortec's sensor driver of SMI_ACC422.
+
 config SENSORS_SMI_ACC455
 	tristate "SMI_ACC4XY Sensor Support"
 	depends on I2C || SPI_MASTER
@@ -111,8 +125,8 @@ config SENSORS_SMI_ACC455
 	If you say yes here, you get support for Bosch Sensortec's sensor driver of SMI_ACC455.
 
 config SMI_ACC4XY_MAG_INTERFACE_SUPPORT
-tristate "SMI_ACC4XY Sensor mag interface support"
-depends on SENSORS_SMI_ACC4XY
+	tristate "SMI_ACC4XY Sensor mag interface support"
+	depends on SENSORS_SMI_ACC4XY
 	help
 	 If you say yes here, you get support for Bosch Sensortec's
 	 sensor driver of SMI_ACC4XY with mag sensor support.
@@ -123,3 +137,5 @@ config ENABLE_SMI_ACC_GYRO_BUFFERING
 	help
 	 Say Y here if you want to buffer boot time sensor
 	 samples for ASM330 accelerometer and gyroscope
+
+endif
