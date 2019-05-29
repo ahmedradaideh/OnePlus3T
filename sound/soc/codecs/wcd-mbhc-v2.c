@@ -1425,8 +1425,8 @@ correct_plug_type:
 			plug_type = MBHC_PLUG_TYPE_HIGH_HPH;
 			wrk_complete = true;
 		} else {
-			pr_debug("%s: cable might be headset: %d\n", __func__,
-					plug_type);
+			pr_debug("%s: cable might be headset: %d mbhc->current_plug = %d\n",
+					__func__, plug_type, mbhc->current_plug);
 			if (!(plug_type == MBHC_PLUG_TYPE_GND_MIC_SWAP)) {
 				plug_type = MBHC_PLUG_TYPE_HEADSET;
 				/*

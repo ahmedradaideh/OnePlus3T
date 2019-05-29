@@ -1306,22 +1306,6 @@ static int get_prop_batt_voltage_max_design(struct smbchg_chip *chip)
 	return uv;
 }
 
-#define DEFAULT_BATT_CHARGE_COUNT	0
-static int get_prop_batt_charge_count(struct smbchg_chip *chip)
-{
-	static int count;
-	int rc;
-
-	if (count > 0 && !chip->usb_present)
-		return count;
-
-	rc = get_property_from_fg(chip, POWER_SUPPLY_PROP_CHARGE_COUNTER, &count);
-	if (rc) {
-		pr_err("Couldn't get cycle_count rc = %d\n", rc);
-		count = DEFAULT_BATT_CHARGE_COUNT;
-	}
-	return count;
-}
 int get_prop_fast_adapter_update(struct smbchg_chip *chg)
 {
 	int update_status;
@@ -4552,6 +4536,15 @@ static bool qpnp_get_fast_chg_ing(struct smbchg_chip *chip)
 	}
 }
 
+static int qpnp_get_ng_count(struct smbchg_chip *chip)
+{
+	if (fast_charger && fast_charger->get_ng_count)
+		return fast_charger->get_ng_count();
+
+	pr_err("no fast_charger register found\n");
+	return 0;
+}
+
 static void dump_regs(struct smbchg_chip *chip);
 
 static int smbchg_otg_regulator_enable(struct regulator_dev *rdev)
@@ -5318,9 +5311,7 @@ static int smbchg_change_usb_supply_type(struct smbchg_chip *chip,
 
 	if (!chip->skip_usb_notification) {
 		propval.intval = type;
-		chip->usb_psy->set_property(chip->usb_psy,
-				POWER_SUPPLY_PROP_REAL_TYPE,
-				&propval);
+		power_supply_set_supply_type(chip->usb_psy, type);
 	}
 
 	/*
@@ -6674,6 +6665,24 @@ static int smbchg_dp_dm(struct smbchg_chip *chip, int val)
 	return rc;
 }
 
+static int smbchg_get_prop_batt_charge_counter(struct smbchg_chip *chip)
+{
+	int rc;
+	union power_supply_propval val;
+
+	if (!chip->bms_psy)
+		return -EINVAL;
+
+	rc = power_supply_get_property(chip->bms_psy,
+				POWER_SUPPLY_PROP_CHARGE_COUNTER, &val);
+	if (rc < 0) {
+		pr_smb(PR_STATUS, "Couldn't get charge count rc = %d\n", rc);
+		return rc;
+	}
+
+	return val.intval;
+}
+
 static int smbchg_get_prop_batt_current_max(struct smbchg_chip *chip)
 {
 	int rc;
@@ -6841,7 +6850,7 @@ static enum power_supply_property smbchg_battery_properties[] = {
 	POWER_SUPPLY_PROP_CHG_PROTECT_STATUS,
 	POWER_SUPPLY_PROP_FASTCHG_STATUS,
 	POWER_SUPPLY_PROP_FASTCHG_STARTING,
-	POWER_SUPPLY_PROP_CHARGE_COUNTER,
+	POWER_SUPPLY_PROP_NG_COUNT,
 	POWER_SUPPLY_PROP_RESISTANCE_ID,
 	POWER_SUPPLY_PROP_CHARGE_FULL,
 	POWER_SUPPLY_PROP_SAFETY_TIMER_ENABLE,
@@ -6851,6 +6860,7 @@ static enum power_supply_property smbchg_battery_properties[] = {
 	POWER_SUPPLY_PROP_FLASH_ACTIVE,
 	POWER_SUPPLY_PROP_FLASH_TRIGGER,
 	POWER_SUPPLY_PROP_DP_DM,
+	POWER_SUPPLY_PROP_CHARGE_COUNTER,
 	POWER_SUPPLY_PROP_INPUT_CURRENT_LIMITED,
 	POWER_SUPPLY_PROP_RERUN_AICL,
 	POWER_SUPPLY_PROP_RESTRICTED_CHARGING,
@@ -7072,8 +7082,8 @@ static int smbchg_battery_get_property(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_FASTCHG_STARTING:
 		val->intval = qpnp_get_fast_chg_ing(chip);
 		break;
-	case POWER_SUPPLY_PROP_CHARGE_COUNTER:
-		val->intval = get_prop_batt_charge_count(chip);
+	case POWER_SUPPLY_PROP_NG_COUNT:
+		val->intval = qpnp_get_ng_count(chip);
 		break;
 	case POWER_SUPPLY_PROP_RESISTANCE_ID:
 		val->intval = get_prop_batt_resistance_id(chip);
@@ -7098,6 +7108,9 @@ static int smbchg_battery_get_property(struct power_supply *psy,
 		break;
 	case POWER_SUPPLY_PROP_DP_DM:
 		val->intval = chip->pulse_cnt;
+		break;
+	case POWER_SUPPLY_PROP_CHARGE_COUNTER:
+		val->intval = smbchg_get_prop_batt_charge_counter(chip);
 		break;
 	case POWER_SUPPLY_PROP_INPUT_CURRENT_LIMITED:
 		val->intval = smbchg_is_input_current_limited(chip);

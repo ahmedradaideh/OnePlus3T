@@ -59,6 +59,7 @@ struct fastchg_device_info {
 	int ap_clk;
 	int ap_data;
 	int dashchg_fw_ver_count ;
+	int ng_count;
 
 	struct power_supply		*batt_psy;
 	struct work_struct fastcg_work;
@@ -417,6 +418,13 @@ static bool bq27541_get_fast_chg_ing(void)
 	return false;
 }
 
+static int bq27541_get_ng_count(void)
+{
+	if (fastchg_di)
+		return fastchg_di->ng_count;
+
+	return 0;
+}
 
 static int bq27541_set_switch_to_noraml_false(void)
 {
@@ -442,15 +450,18 @@ int dash_get_adapter_update_status(void)
 		return fastchg_di->adapter_update_report;
 }
 static struct external_battery_gauge fastcharge_information  = {
-	.fast_chg_started 						= bq27541_fast_chg_started,
-	.get_fast_low_temp_full					= bq27541_get_fast_low_temp_full,
-	.fast_switch_to_normal					= bq27541_fast_switch_to_normal,
-	.get_fast_chg_ing						= bq27541_get_fast_chg_ing,
-	.set_fast_chg_allow						= bq27541_set_fast_chg_allow,
-	.get_fast_chg_allow						= bq27541_get_fast_chg_allow,
-	.set_switch_to_noraml_false				= bq27541_set_switch_to_noraml_false,
-	.get_fastchg_firmware_already_updated	= get_fastchg_firmware_already_updated,
-	.get_adapter_update = dash_get_adapter_update_status,
+	.fast_chg_started           = bq27541_fast_chg_started,
+	.get_fast_low_temp_full     = bq27541_get_fast_low_temp_full,
+	.fast_switch_to_normal      = bq27541_fast_switch_to_normal,
+	.get_fast_chg_ing           = bq27541_get_fast_chg_ing,
+	.get_ng_count               = bq27541_get_ng_count,
+	.set_fast_chg_allow         = bq27541_set_fast_chg_allow,
+	.get_fast_chg_allow         = bq27541_get_fast_chg_allow,
+	.set_switch_to_noraml_false = bq27541_set_switch_to_noraml_false,
+	.get_fastchg_firmware_already_updated
+		= get_fastchg_firmware_already_updated,
+	.get_adapter_update
+		= dash_get_adapter_update_status,
 };
 
 static struct notify_dash_event *notify_event = NULL;
@@ -907,6 +918,7 @@ static long  dash_dev_ioctl(struct file *filp, unsigned int cmd,
 				di->fast_chg_ing = false;
 				oneplus_notify_pmic_check_charger_present();
 				oneplus_notify_dash_charger_present(false);
+				di->ng_count++;
 				wake_unlock(&di->fastchg_wake_lock);
 			}
 			break;
@@ -1137,6 +1149,7 @@ static int dash_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	di->fast_chg_ing = false;
 	di->fast_low_temp_full = false;
 	di->fast_chg_started = false;
+	di->ng_count = 0;
 
 	fastchg_di=di;
 

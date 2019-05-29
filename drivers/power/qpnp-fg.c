@@ -1386,11 +1386,6 @@ static void fg_enable_irqs(struct fg_chip *chip, bool enable)
 
 	if (enable) {
 		enable_irq(chip->batt_irq[BATT_MISSING].irq);
-		if (!chip->vbat_low_irq_enabled) {
-			enable_irq(chip->batt_irq[VBATT_LOW].irq);
-			enable_irq_wake(chip->batt_irq[VBATT_LOW].irq);
-			chip->vbat_low_irq_enabled = true;
-		}
 		if (!chip->use_vbat_low_empty_soc) {
 			enable_irq(chip->soc_irq[EMPTY_SOC].irq);
 			enable_irq_wake(chip->soc_irq[EMPTY_SOC].irq);
@@ -1398,11 +1393,6 @@ static void fg_enable_irqs(struct fg_chip *chip, bool enable)
 		chip->irqs_enabled = true;
 	} else {
 		disable_irq(chip->batt_irq[BATT_MISSING].irq);
-		if (chip->vbat_low_irq_enabled) {
-			disable_irq_wake(chip->batt_irq[VBATT_LOW].irq);
-			disable_irq_nosync(chip->batt_irq[VBATT_LOW].irq);
-			chip->vbat_low_irq_enabled = false;
-		}
 		if (!chip->use_vbat_low_empty_soc) {
 			disable_irq_wake(chip->soc_irq[EMPTY_SOC].irq);
 			disable_irq_nosync(chip->soc_irq[EMPTY_SOC].irq);
