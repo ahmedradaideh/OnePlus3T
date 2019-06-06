@@ -9,8 +9,9 @@
 static struct op_adapter_chip *the_chip;
 
 #define DEFALUT_TX_VALUE 0xFF
+
 static void dash_uart_gpio_set_value(struct op_adapter_chip *chip,
-	unsigned long pin, bool value)
+		unsigned long pin, bool value)
 {
 	if (chip->tx_invalid_val != value) {
 		gpio_set_value(pin, value);
@@ -18,10 +19,11 @@ static void dash_uart_gpio_set_value(struct op_adapter_chip *chip,
 	}
 }
 
-#define update_cycle 998
-#define  LOG_COUNT 30
+#define update_cycle	998
+#define LOG_COUNT	30
 int rx_time[LOG_COUNT];
 int tx_time[LOG_COUNT];
+
 void print_oem(void)
 {
 	int i;
@@ -64,8 +66,8 @@ void oem_delay(struct op_adapter_chip *chip, cycles_t begin_time)
 	}
 }
 
-static void dash_uart_tx_bit(
-	struct op_adapter_chip *chip, unsigned char tx_data)
+static void dash_uart_tx_bit(struct op_adapter_chip *chip,
+		unsigned char tx_data)
 {
 	static unsigned char tx_bit = BIT_START;
 
@@ -114,7 +116,7 @@ static int dash_uart_rx_bit(struct op_adapter_chip *chip)
 			rx_bit = BIT_0;
 			chip->timer_delay = 78; /* 1.5 cycle */
 		} else {
-			chip->timer_delay = 2;	/* 0.02 cycle */
+			chip->timer_delay = 2; /* 0.02 cycle */
 		}
 		break;
 	case BIT_0:
@@ -143,8 +145,8 @@ static int dash_uart_rx_bit(struct op_adapter_chip *chip)
 	return rx_val;
 }
 
-static void dash_uart_tx_byte(
-	struct op_adapter_chip *chip, unsigned char tx_data)
+static void dash_uart_tx_byte(struct op_adapter_chip *chip,
+		unsigned char tx_data)
 {
 	cycles_t time, curl_time, begin_time;
 	int i = 0;
@@ -152,7 +154,7 @@ static void dash_uart_tx_byte(
 	chip->timer_delay = 52;
 	while (1) {
 		begin_time = get_cycles();
-		mb();/*need const tx*/
+		mb(); /* need const tx */
 		dash_uart_tx_bit(chip, tx_data);
 		curl_time = get_cycles();
 		time = curl_time - begin_time;
@@ -169,8 +171,8 @@ static void dash_uart_tx_byte(
 	}
 }
 
-static unsigned char dash_uart_rx_byte(
-	struct op_adapter_chip *chip, unsigned int cmd)
+static unsigned char dash_uart_rx_byte(struct op_adapter_chip *chip,
+		unsigned int cmd)
 {
 	unsigned char rx_val = 0;
 	unsigned int count = 0;
@@ -197,7 +199,7 @@ static unsigned char dash_uart_rx_byte(
 	chip->timer_delay = 25;
 	while (1) {
 		begin_time = get_cycles();
-		mb();/*need a const rx*/
+		mb(); /* need a const rx */
 		rx_val = dash_uart_rx_bit(chip);
 		curl_time = get_cycles();
 		time = curl_time - begin_time;
@@ -230,8 +232,8 @@ static void dash_uart_irq_fiq_enable(bool enable)
 	}
 }
 
-static int dash_uart_write_some_addr(
-	struct op_adapter_chip *chip, u8 *fw_buf, int length)
+static int dash_uart_write_some_addr(struct op_adapter_chip *chip,
+		u8 *fw_buf, int length)
 {
 	unsigned int write_addr = 0, i = 0, fw_count = 0;
 	unsigned char rx_val = 0;
@@ -283,8 +285,8 @@ static int dash_uart_write_some_addr(
 #define STM8S_ADAPTER_LAST_ADDR		0x9FEF
 #define HALF_ONE_LINE			16
 
-static bool dash_uart_read_addr_line_and_check(
-	struct op_adapter_chip *chip, unsigned int addr)
+static bool dash_uart_read_addr_line_and_check(struct op_adapter_chip *chip,
+		unsigned int addr)
 {
 	unsigned char fw_check_buf[20] = {0x00};
 	int i = 0;
@@ -323,7 +325,7 @@ static bool dash_uart_read_addr_line_and_check(
 		fw_check_buf[i + 2] =
 			dash_uart_rx_byte(chip, Read_Addr_Line_Cmd);
 		if (chip->rx_timeout)
-			goto  read_addr_line_err;
+			goto read_addr_line_err;
 	}
 
 	if (!(addr % 0x20)) {
@@ -366,8 +368,9 @@ read_addr_line_err:
 			adapter_stm8s_firmware_data[fw_line * 34 + 2 + i]);
 		for (i = 0; i < 16; i++)
 			pr_err("fw_check_buf[%d]=0x%x\n",
-			i+2, fw_check_buf[i + 2]);
+				i+2, fw_check_buf[i + 2]);
 	}
+
 	return check_result;
 }
 
@@ -385,13 +388,12 @@ static int dash_uart_read_front_addr_and_check(struct op_adapter_chip *chip)
 			return -EINVAL;
 		}
 	}
+
 	return 0;
 }
 
-static bool
-dash_adapter_update_handle(
-	struct op_adapter_chip *chip,
-	unsigned long tx_pin, unsigned long rx_pin)
+static bool dash_adapter_update_handle(struct op_adapter_chip *chip,
+	   unsigned long tx_pin, unsigned long rx_pin)
 {
 	unsigned char rx_val = 0;
 	int rx_last_line_count = 0;
@@ -559,9 +561,8 @@ bool dash_adapter_update_is_rx_gpio(unsigned long gpio_num)
 		return false;
 }
 
-
 struct op_adapter_operations op_adapter_ops = {
-		.adapter_update = dash_adapter_update_handle,
+	.adapter_update = dash_adapter_update_handle,
 };
 
 static int __init dash_adapter_init(void)
@@ -588,11 +589,9 @@ static int __init dash_adapter_init(void)
 	pr_info("%s success\n", __func__);
 	return 0;
 }
+module_init(dash_adapter_init);
 
 static void __init dash_adapter_exit(void)
 {
-
 }
-
-module_init(dash_adapter_init);
 module_exit(dash_adapter_exit);
