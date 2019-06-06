@@ -157,7 +157,7 @@ struct bq27541_device_info {
 	int low_bat_capacity;
 	int low_bat_voltage_uv;
 	bool lcd_is_off;
-	bool alow_reading;
+	bool allow_reading;
 	bool fastchg_started;
 	bool support_4p4v_bat;
 	bool is_4p4v_bat;
@@ -200,7 +200,7 @@ static int bq27541_battery_temperature(struct bq27541_device_info *di)
 	if (atomic_read(&di->suspended) == 1)
 		return di->temp_pre + ZERO_DEGREE_CELSIUS_IN_TENTH_KELVIN;
 
-	if (di->alow_reading) {
+	if (di->allow_reading) {
 		ret = bq27541_read(BQ27541_REG_TEMP, &temp, 0, di);
 		/*
 		 * Add for don't report battery not connect
@@ -244,7 +244,7 @@ static int bq27541_battery_voltage(struct bq27541_device_info *di)
 	if (atomic_read(&di->suspended) == 1)
 		return di->batt_vol_pre;
 
-	if (di->alow_reading) {
+	if (di->allow_reading) {
 		ret = bq27541_read(BQ27541_REG_VOLT, &volt, 0, di);
 		if (ret) {
 			pr_err("error reading voltage,ret:%d\n", ret);
@@ -718,7 +718,7 @@ static int bq27541_battery_soc(struct bq27541_device_info *di,
 		return di->soc_pre;
 	}
 
-	if (di->alow_reading) {
+	if (di->allow_reading) {
 		ret = bq27541_read(BQ27541_REG_SOC, &soc, 0, di);
 		if (ret) {
 			pr_err("error reading soc=%d, ret:%d\n", soc, ret);
@@ -782,7 +782,7 @@ static int bq27541_average_current(struct bq27541_device_info *di)
 	if (atomic_read(&di->suspended) == 1)
 		return -di->current_pre;
 
-	if (di->alow_reading) {
+	if (di->allow_reading) {
 		ret = bq27541_read(BQ27541_REG_AI, &curr, 0, di);
 		if (ret) {
 			pr_err("error reading current.\n");
@@ -803,7 +803,7 @@ static int bq27541_remaining_capacity(struct bq27541_device_info *di)
 	int ret;
 	int cap = 0;
 
-	if (di->alow_reading) {
+	if (di->allow_reading) {
 		ret = bq27541_read(BQ27541_REG_RM, &cap, 0, di);
 		if (ret) {
 			pr_err("error reading capacity.\n");
@@ -819,7 +819,7 @@ static int bq27541_batt_health(struct bq27541_device_info *di)
 	int ret;
 	int health = 0;
 
-	if (di->alow_reading) {
+	if (di->allow_reading) {
 		ret = bq27541_read(BQ27541_REG_NIC, &health, 0, di);
 		if (ret) {
 			pr_err("error reading health\n");
@@ -876,10 +876,10 @@ static int bq27541_get_average_current(void)
 	return bq27541_average_current(bq27541_di);
 }
 
-static int bq27541_set_alow_reading(int enable)
+static int bq27541_set_allow_reading(int enable)
 {
 	if (bq27541_di)
-		bq27541_di->alow_reading = enable;
+		bq27541_di->allow_reading = enable;
 
 	return 0;
 }
@@ -950,8 +950,8 @@ static struct external_battery_gauge bq27541_batt_gauge = {
 		bq27541_get_battery_soc,
 	.get_average_current =
 		bq27541_get_average_current,
-	.set_alow_reading =
-		bq27541_set_alow_reading,
+	.set_allow_reading =
+		bq27541_set_allow_reading,
 	.set_lcd_off_status =
 		bq27541_set_lcd_off_status,
 	.fast_chg_started_status =
@@ -1003,17 +1003,17 @@ static void update_battery_soc_work(struct work_struct *work)
 			msecs_to_jiffies(BATTERY_SOC_UPDATE_MS));
 		if (get_dash_started() == true)
 			return;
-		if (!bq27541_di->alow_reading)
-			bq27541_set_alow_reading(true);
+		if (!bq27541_di->allow_reading)
+			bq27541_set_allow_reading(true);
 		return;
 	}
-	bq27541_set_alow_reading(true);
+	bq27541_set_allow_reading(true);
 	bq27541_get_battery_mvolts();
 	bq27541_get_average_current();
 	bq27541_get_battery_temperature();
 	bq27541_get_battery_soc();
 	bq27541_get_batt_remaining_capacity();
-	bq27541_set_alow_reading(false);
+	bq27541_set_allow_reading(false);
 	queue_delayed_work(system_power_efficient_wq,
 		&bq27541_di->battery_soc_work,
 		msecs_to_jiffies(BATTERY_SOC_UPDATE_MS));
@@ -1249,9 +1249,9 @@ static struct platform_device this_device = {
 static void update_pre_capacity_func(struct work_struct *w)
 {
 	pr_info("enter\n");
-	bq27541_set_alow_reading(true);
+	bq27541_set_allow_reading(true);
 	bq27541_battery_soc(bq27541_di, update_pre_capacity_data.suspend_time);
-	bq27541_set_alow_reading(false);
+	bq27541_set_allow_reading(false);
 	wake_unlock(&bq27541_di->update_soc_wake_lock);
 	pr_info("exit\n");
 }
@@ -1327,7 +1327,7 @@ static int bq27541_battery_probe(struct i2c_client *client,
 		WAKE_LOCK_SUSPEND, "bq_delt_soc_wake_lock");
 	di->soc_pre = DEFAULT_INVALID_SOC_PRE;
 	di->temp_pre = 0;
-	di->alow_reading = true;
+	di->allow_reading = true;
 	/* Add for retry when config fail */
 	di->retry_count = MAX_RETRY_COUNT;
 	atomic_set(&di->suspended, 0);

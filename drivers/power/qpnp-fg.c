@@ -5871,8 +5871,8 @@ static void oem_update_cc_cv_setpoint(struct fg_chip *chip,int cv_float_point)
 static void oneplus_set_allow_read_iic(struct fg_chip *chip,bool status)
 {
 	if (chip->use_external_fg && external_fg
-			&& external_fg->set_alow_reading)
-		external_fg->set_alow_reading(status);
+			&& external_fg->set_allow_reading)
+		external_fg->set_allow_reading(status);
 	else
 		pr_info("set allow read extern fg iic fail\n");
 }

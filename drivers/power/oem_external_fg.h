@@ -65,7 +65,7 @@ struct external_battery_gauge {
 	int (*get_ng_count)(void);
 	bool (*get_fast_low_temp_full)(void);
 	int (*set_low_temp_full_false)(void);
-	int (*set_alow_reading)(int enable);
+	int (*set_allow_reading)(int enable);
 	int (*set_lcd_off_status)(int status);
 	int (*fast_chg_started_status)(bool status);
 	bool (*get_fastchg_firmware_already_updated)(void);
@@ -115,7 +115,7 @@ extern int load_soc(void);
 extern void backup_soc_ex(int soc);
 extern void clean_backup_soc_ex(void);
 
-/* From oneplus_fastcg.c */
+/* From oneplus_fastchg.c */
 extern void msm_cpuidle_set_sleep_disable(bool disable);
 
 /* add for dash adapter update */
