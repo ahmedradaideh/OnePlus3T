@@ -347,7 +347,7 @@ struct smbchg_chip {
 	int				lcd_on_iusb;
 	int				typeC_support_current_ma;
 	/* Modify for charge standard */
-	temp_region_type		mBattTempRegion;
+	enum temp_region_type		mBattTempRegion;
 	enum chg_battery_status_type	battery_status;
 	short				mBattTempBoundT0;
 	short				mBattTempBoundT1;
@@ -612,13 +612,13 @@ module_param_named(
 	struct smbchg_chip *g_chip;
 	static int smbchg_charging_en(struct smbchg_chip *chip, bool en);
 	static int get_prop_charger_voltage_now(struct smbchg_chip *chip);
-	static temp_region_type qpnp_battery_temp_region_get(struct smbchg_chip *chip);
+	static enum temp_region_type qpnp_battery_temp_region_get(struct smbchg_chip *chip);
 	static void qpnp_check_charger_uovp(struct smbchg_chip *chip);
 	static int qpnp_check_battery_temp(struct smbchg_chip *chip);
 	static int smbchg_set_usb_current_max(struct smbchg_chip *chip,
 			int current_ma);
 	static void qpnp_battery_temp_region_set(struct smbchg_chip *chip,
-			temp_region_type batt_temp_region);
+			enum temp_region_type batt_temp_region);
 	static int fake_insertion_removal(struct smbchg_chip *chip, bool insertion);
 	static int update_dash_unplug_status(void);
 	static int set_dash_charger_present(int status);
@@ -1800,7 +1800,7 @@ static int get_prop_chg_protect_status(struct smbchg_chip *chip)
 {
 	int temp, vbus_mv, charger_present = 0;
 	bool batt_present;
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	if (use_fake_authentic)
 		return fake_authentic;
@@ -4310,12 +4310,6 @@ static void check_battery_type(struct smbchg_chip *chip)
 				en, 0);
 		}
 	}
-}
-
-static void switch_mode_to_normal(void)
-{
-	usb_sw_gpio_set(0);
-	mcu_en_gpio_set(1);
 }
 
 void fastcharge_information_register(struct external_battery_gauge *fast_chg)
@@ -9126,13 +9120,13 @@ static int create_debugfs_entries(struct smbchg_chip *chip)
 	return 0;
 }
 
-static temp_region_type qpnp_battery_temp_region_get(struct smbchg_chip *chip)
+static enum temp_region_type qpnp_battery_temp_region_get(struct smbchg_chip *chip)
 {
 	return chip->mBattTempRegion;
 }
 
 static void qpnp_battery_temp_region_set(struct smbchg_chip *chip,
-		temp_region_type batt_temp_region)
+		enum temp_region_type batt_temp_region)
 {
 	chip->mBattTempRegion = batt_temp_region;
 	pr_info("set temp_region = %d\n", chip->mBattTempRegion);
@@ -9311,7 +9305,7 @@ void set_chg_ibat_vbat_max(struct smbchg_chip *chip, int ibat, int vfloat )
 /* Tbatt < -3C */
 static int handle_batt_temp_cold(struct smbchg_chip *chip)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	temp_region = qpnp_battery_temp_region_get(chip);
 	if (temp_region != BATT_TEMP_COLD || chip->is_power_changed) {
@@ -9337,7 +9331,7 @@ static int handle_batt_temp_cold(struct smbchg_chip *chip)
 /* -3C <= Tbatt <= 0C */
 static int handle_batt_temp_little_cold(struct smbchg_chip *chip)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	if (chip->chg_ovp)
 		return 0;
@@ -9374,7 +9368,7 @@ static int handle_batt_temp_little_cold(struct smbchg_chip *chip)
 /* 0C < Tbatt <= 5C*/
 static int handle_batt_temp_cool(struct smbchg_chip *chip)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	if (chip->chg_ovp)
 		return 0;
@@ -9455,7 +9449,7 @@ static int handle_batt_temp_little_cool(struct smbchg_chip *chip)
 /* 12C < Tbatt < 22C */
 static int handle_batt_temp_prenormal(struct smbchg_chip *chip)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	if (chip->chg_ovp)
 		return 0;
@@ -9497,7 +9491,7 @@ static int handle_batt_temp_prenormal(struct smbchg_chip *chip)
 /* 15C < Tbatt < 45C */
 static int handle_batt_temp_normal(struct smbchg_chip *chip)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	if (chip->chg_ovp)
 		return 0;
@@ -9539,7 +9533,7 @@ static int handle_batt_temp_normal(struct smbchg_chip *chip)
 /* 45C <= Tbatt <= 55C */
 static int handle_batt_temp_warm(struct smbchg_chip *chip)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	if (chip->chg_ovp)
 		return 0;
@@ -9581,7 +9575,7 @@ static int handle_batt_temp_warm(struct smbchg_chip *chip)
 /* 55C < Tbatt */
 static int handle_batt_temp_hot(struct smbchg_chip *chip)
 {
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	temp_region = qpnp_battery_temp_region_get(chip);
 	if ((temp_region != BATT_TEMP_HOT)
@@ -9861,7 +9855,7 @@ static void update_heartbeat(struct work_struct *work)
 	struct smbchg_chip *chip = container_of(dwork,
 			struct smbchg_chip, update_heartbeat_work);
 	char *usb_type_name = "null";
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 	bool charger_present, fast_charging;
 	static int batt_temp = 0, vbat_mv = 0;
 	enum power_supply_type usb_supply_type;
@@ -10094,7 +10088,7 @@ static struct notify_dash_event notify_unplug_event  = {
 static int get_batt_status(struct smbchg_chip *chip)
 {
 	int capacity, batt_status;
-	temp_region_type temp_region;
+	enum temp_region_type temp_region;
 
 	temp_region = qpnp_battery_temp_region_get(chip);
 	capacity = get_prop_batt_capacity(chip);

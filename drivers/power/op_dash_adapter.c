@@ -540,7 +540,7 @@ update_err:
 	return false;
 }
 
-bool dash_adapter_update_is_tx_gpio(unsigned long gpio_num)
+bool dash_adapter_update_is_tx_gpio(unsigned int gpio_num)
 {
 	if (!the_chip)
 		return false;
@@ -550,7 +550,7 @@ bool dash_adapter_update_is_tx_gpio(unsigned long gpio_num)
 		return false;
 }
 
-bool dash_adapter_update_is_rx_gpio(unsigned long gpio_num)
+bool dash_adapter_update_is_rx_gpio(unsigned int gpio_num)
 {
 	if (!the_chip)
 		return false;
