@@ -3405,7 +3405,10 @@ int mdss_fb_atomic_commit(struct fb_info *info,
 
 	commit_v1 = &commit->commit_v1;
 	if (commit_v1->flags & MDP_VALIDATE_LAYER) {
-		ret = mdss_fb_wait_for_kickoff(mfd);
+		ret = 0;
+		if (!mfd->skip_koff_wait)
+			ret = mdss_fb_wait_for_kickoff(mfd);
+
 		if (ret) {
 			pr_err("wait for kickoff failed\n");
 		} else {
