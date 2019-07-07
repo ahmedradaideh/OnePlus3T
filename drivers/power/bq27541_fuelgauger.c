@@ -38,7 +38,6 @@
 #ifdef CONFIG_OF
 #include <linux/of_gpio.h>
 #endif
-#include <linux/wakelock.h>
 #include "oem_external_fg.h"
 
 #define DRIVER_VERSION			"1.1.0"
@@ -139,7 +138,7 @@ struct bq27541_device_info {
 	 */
 	struct delayed_work hw_config;
 	struct delayed_work battery_soc_work;
-	struct wake_lock update_soc_wake_lock;
+	struct wakeup_source update_soc_wake_lock;
 	struct power_supply *batt_psy;
 	int saltate_counter;
 	/* Add for retry when config fail */
@@ -1258,7 +1257,7 @@ static void update_pre_capacity_func(struct work_struct *w)
 	bq27541_set_allow_reading(true);
 	bq27541_battery_soc(bq27541_di, update_pre_capacity_data.suspend_time);
 	bq27541_set_allow_reading(false);
-	wake_unlock(&bq27541_di->update_soc_wake_lock);
+	__pm_relax(&bq27541_di->update_soc_wake_lock);
 	pr_info("exit\n");
 }
 
@@ -1327,8 +1326,7 @@ static int bq27541_battery_probe(struct i2c_client *client,
 	di->client = client;
 	bq27541_parse_dt(di);
 
-	wake_lock_init(&di->update_soc_wake_lock,
-		WAKE_LOCK_SUSPEND, "bq_delt_soc_wake_lock");
+	wakeup_source_init(&di->update_soc_wake_lock, "bq_delt_soc_wake_lock");
 	di->soc_pre = DEFAULT_INVALID_SOC_PRE;
 	di->temp_pre = 0;
 	di->allow_reading = true;
@@ -1446,7 +1444,7 @@ static int bq27541_battery_resume(struct i2c_client *client)
 	if (di->rtc_resume_time - di->lcd_off_time >= TWO_POINT_FIVE_MINUTES) {
 		pr_err("di->rtc_resume_time - di->lcd_off_time=%ld\n",
 			di->rtc_resume_time - di->lcd_off_time);
-		wake_lock(&di->update_soc_wake_lock);
+		__pm_stay_awake(&di->update_soc_wake_lock);
 		get_current_time(&di->lcd_off_time);
 		queue_delayed_work(update_pre_capacity_data.workqueue,
 			&(update_pre_capacity_data.work),
