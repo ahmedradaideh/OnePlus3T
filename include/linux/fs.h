@@ -2845,16 +2845,19 @@ static inline bool dir_emit(struct dir_context *ctx,
 {
 	return ctx->actor(ctx, name, namelen, ctx->pos, ino, type) == 0;
 }
+
 static inline bool dir_emit_dot(struct file *file, struct dir_context *ctx)
 {
 	return ctx->actor(ctx, ".", 1, ctx->pos,
 			  file->f_path.dentry->d_inode->i_ino, DT_DIR) == 0;
 }
+
 static inline bool dir_emit_dotdot(struct file *file, struct dir_context *ctx)
 {
 	return ctx->actor(ctx, "..", 2, ctx->pos,
 			  parent_ino(file->f_path.dentry), DT_DIR) == 0;
 }
+
 static inline bool dir_emit_dots(struct file *file, struct dir_context *ctx)
 {
 	if (ctx->pos == 0) {
@@ -2869,6 +2872,7 @@ static inline bool dir_emit_dots(struct file *file, struct dir_context *ctx)
 	}
 	return true;
 }
+
 static inline bool dir_relax(struct inode *inode)
 {
 	mutex_unlock(&inode->i_mutex);
@@ -2877,5 +2881,8 @@ static inline bool dir_relax(struct inode *inode)
 }
 
 extern void inode_nohighmem(struct inode *inode);
+
+int vfs_ioc_setflags_prepare(struct inode *inode, unsigned int oldflags,
+			     unsigned int flags);
 
 #endif /* _LINUX_FS_H */
